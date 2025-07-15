@@ -1,7 +1,7 @@
 services:
   analyser:
-    image: ddd
+    build: .
     ports:
       - "8080:5000"
     volumes:
-      - ./input:/
+      - ./:/app

@@ -12,7 +12,7 @@ APP_VERSION = "1.0.0"
 DEBUG = os.environ.get('DEBUG', 'False').lower() == 'true'
 
 # Server settings
-HOST = '127.0.0.1'
+HOST = '0.0.0.0'
 PORT = 5000
 MAX_CONTENT_LENGTH = 100 * 1024 * 1024  # 100MB
 
