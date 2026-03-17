@@ -2,8 +2,13 @@ package com.docling.studio.document;
 
 import com.docling.studio.shared.exception.ResourceNotFoundException;
 import com.docling.studio.shared.exception.ServiceException;
+import org.apache.pdfbox.Loader;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -14,6 +19,8 @@ import java.util.UUID;
 
 @Service
 public class DocumentService {
+
+    private static final Logger log = LoggerFactory.getLogger(DocumentService.class);
 
     private final DocumentRepository repository;
     private final DocumentParserClient parserClient;
@@ -29,6 +36,7 @@ public class DocumentService {
         this.storagePath = Path.of(storagePath);
     }
 
+    @Transactional
     public Document upload(MultipartFile file) {
         if (file.isEmpty() || file.getOriginalFilename() == null) {
             throw new IllegalArgumentException("File is empty or has no name");
@@ -46,6 +54,7 @@ public class DocumentService {
                     file.getSize(),
                     target.toString()
             );
+            doc.setPageCount(countPages(target));
             return repository.save(doc);
 
         } catch (IOException e) {
@@ -66,6 +75,7 @@ public class DocumentService {
                 .orElseThrow(() -> new ResourceNotFoundException("Document not found: " + id));
     }
 
+    @Transactional
     public void delete(UUID id) {
         Document doc = findById(id);
         try {
@@ -84,5 +94,14 @@ public class DocumentService {
     public Path getFilePath(UUID id) {
         Document doc = findById(id);
         return Path.of(doc.getStoragePath());
+    }
+
+    private int countPages(Path pdfPath) {
+        try (PDDocument pdf = Loader.loadPDF(pdfPath.toFile())) {
+            return pdf.getNumberOfPages();
+        } catch (Exception e) {
+            log.warn("Could not count pages for {}: {}", pdfPath.getFileName(), e.getMessage());
+            return 0;
+        }
     }
 }

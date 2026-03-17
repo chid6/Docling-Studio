@@ -40,12 +40,14 @@ import { ref, computed, watch, nextTick, reactive, onMounted, onBeforeUnmount } 
 import { computeScale, bboxToRect, pointInRect } from '../bboxScaling.js'
 
 const ELEMENT_COLORS = {
+  title: '#EF4444',
   section_header: '#F97316',
   text: '#3B82F6',
   table: '#8B5CF6',
   picture: '#22C55E',
   list: '#06B6D4',
   formula: '#EC4899',
+  code: '#14B8A6',
   caption: '#EAB308'
 }
 

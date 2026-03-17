@@ -20,7 +20,11 @@ public class AnalysisController {
 
     @PostMapping
     public AnalysisResponse create(@RequestBody Map<String, String> body) {
-        UUID documentId = UUID.fromString(body.get("documentId"));
+        String raw = body.get("documentId");
+        if (raw == null || raw.isBlank()) {
+            throw new IllegalArgumentException("documentId is required");
+        }
+        UUID documentId = UUID.fromString(raw);
         AnalysisJob job = service.create(documentId);
         return AnalysisResponse.from(job);
     }
