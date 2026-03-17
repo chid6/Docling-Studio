@@ -10,6 +10,8 @@ from docling.document_converter import DocumentConverter
 from pdf2image import convert_from_bytes
 from PIL import Image
 
+from bbox import to_topleft_list
+
 app = FastAPI(title="Docling Studio - Document Parser")
 
 converter = DocumentConverter()
@@ -86,11 +88,13 @@ def _process_content_item(item, pages: dict[int, PageDetail]):
                 page_number=page_no, width=612.0, height=792.0, elements=[]
             )
 
+        page_height = pages[page_no].height
+
         bbox = [0, 0, 0, 0]
         if hasattr(prov, 'bbox') and prov.bbox:
             b = prov.bbox
             if hasattr(b, 'l'):
-                bbox = [b.l, b.t, b.r, b.b]
+                bbox = to_topleft_list(b, page_height)
             elif isinstance(b, (list, tuple)) and len(b) >= 4:
                 bbox = list(b[:4])
 

@@ -91,11 +91,11 @@
               :value="currentPage"
               @change="onPageInput"
               min="1"
-              :max="selectedDoc.pageCount || 999"
+              :max="selectedDoc.pageCount || 1"
             />
           </div>
           <span class="pdf-page-total">/ {{ selectedDoc.pageCount || '?' }}</span>
-          <button class="pdf-nav-btn" :disabled="selectedDoc.pageCount && currentPage >= selectedDoc.pageCount" @click="currentPage++">
+          <button class="pdf-nav-btn" :disabled="!selectedDoc.pageCount || currentPage >= selectedDoc.pageCount" @click="currentPage++">
             <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/></svg>
           </button>
           <span class="pdf-separator" />
@@ -227,7 +227,9 @@ const previewUrl = computed(() => {
 
 function onPageInput(e) {
   const val = parseInt(e.target.value)
-  if (val >= 1) currentPage.value = val
+  if (!val || val < 1) return
+  const max = selectedDoc.value?.pageCount || val
+  currentPage.value = Math.min(val, max)
 }
 
 async function runAnalysis() {

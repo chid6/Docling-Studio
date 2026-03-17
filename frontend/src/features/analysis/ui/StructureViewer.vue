@@ -61,6 +61,7 @@
 <script setup>
 import { ref, computed, watch, nextTick, reactive } from 'vue'
 import { getPreviewUrl } from '../../document/api.js'
+import { computeScale, bboxToRect, pointInRect } from '../bboxScaling.js'
 
 const ELEMENT_COLORS = {
   section_header: '#F97316',
@@ -132,24 +133,18 @@ function drawOverlay() {
   const page = currentPageData.value
   if (!page) return
 
-  const scaleX = img.clientWidth / page.width
-  const scaleY = img.clientHeight / page.height
+  const scale = computeScale(img.clientWidth, img.clientHeight, page.width, page.height)
 
   for (const el of visibleElements.value) {
-    const [x0, y0, x1, y1] = el.bbox
-    const rx = x0 * scaleX
-    const ry = y0 * scaleY
-    const rw = (x1 - x0) * scaleX
-    const rh = (y1 - y0) * scaleY
-
+    const rect = bboxToRect(el.bbox, scale)
     const color = ELEMENT_COLORS[el.type] || ELEMENT_COLORS.text
 
     ctx.strokeStyle = color
     ctx.lineWidth = 2
-    ctx.strokeRect(rx, ry, rw, rh)
+    ctx.strokeRect(rect.x, rect.y, rect.w, rect.h)
 
     ctx.fillStyle = color + '20'
-    ctx.fillRect(rx, ry, rw, rh)
+    ctx.fillRect(rect.x, rect.y, rect.w, rect.h)
   }
 }
 
@@ -159,22 +154,15 @@ function onMouseMove(e) {
   const img = imageRef.value
   if (!canvas || !page || !img) return
 
-  const rect = canvas.getBoundingClientRect()
-  const mx = e.clientX - rect.left
-  const my = e.clientY - rect.top
+  const canvasRect = canvas.getBoundingClientRect()
+  const mx = e.clientX - canvasRect.left
+  const my = e.clientY - canvasRect.top
 
-  const scaleX = img.clientWidth / page.width
-  const scaleY = img.clientHeight / page.height
+  const scale = computeScale(img.clientWidth, img.clientHeight, page.width, page.height)
 
   let found = null
   for (const el of visibleElements.value) {
-    const [x0, y0, x1, y1] = el.bbox
-    const rx = x0 * scaleX
-    const ry = y0 * scaleY
-    const rw = (x1 - x0) * scaleX
-    const rh = (y1 - y0) * scaleY
-
-    if (mx >= rx && mx <= rx + rw && my >= ry && my <= ry + rh) {
+    if (pointInRect(mx, my, bboxToRect(el.bbox, scale))) {
       found = el
       break
     }
