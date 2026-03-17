@@ -1,9 +1,0 @@
-transformers
-accelerate
-torch
-torchvision
-pdf2image
-pillow
-requests
-flask
-docling_core

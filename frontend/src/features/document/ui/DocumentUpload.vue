@@ -1,0 +1,109 @@
+<template>
+  <div
+    class="upload-zone"
+    :class="{ dragging, uploading: store.uploading }"
+    @dragover.prevent="dragging = true"
+    @dragleave.prevent="dragging = false"
+    @drop.prevent="onDrop"
+    @click="openFilePicker"
+  >
+    <input ref="fileInput" type="file" accept=".pdf" hidden @change="onFileSelect" />
+    <div v-if="store.uploading" class="upload-state">
+      <div class="spinner" />
+      <span>Uploading...</span>
+    </div>
+    <div v-else class="upload-state">
+      <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path d="M12 16V4m0 0L8 8m4-4l4 4M4 17v2a1 1 0 001 1h14a1 1 0 001-1v-2" />
+      </svg>
+      <span class="upload-text">Drop a PDF here or click to upload</span>
+      <span class="upload-hint">Max 50MB</span>
+    </div>
+  </div>
+</template>
+
+<script setup>
+import { ref } from 'vue'
+import { useDocumentStore } from '../store.js'
+
+const store = useDocumentStore()
+const fileInput = ref(null)
+const dragging = ref(false)
+
+function openFilePicker() {
+  fileInput.value?.click()
+}
+
+async function onFileSelect(e) {
+  const file = e.target.files?.[0]
+  if (file) await store.upload(file)
+  e.target.value = ''
+}
+
+async function onDrop(e) {
+  dragging.value = false
+  const file = e.dataTransfer.files?.[0]
+  if (file && file.type === 'application/pdf') {
+    await store.upload(file)
+  }
+}
+</script>
+
+<style scoped>
+.upload-zone {
+  border: 2px dashed var(--border-light);
+  border-radius: var(--radius);
+  padding: 32px 16px;
+  text-align: center;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.upload-zone:hover,
+.upload-zone.dragging {
+  border-color: var(--accent);
+  background: var(--accent-muted);
+}
+
+.upload-zone.uploading {
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+.upload-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.upload-icon {
+  width: 36px;
+  height: 36px;
+  color: var(--text-muted);
+}
+
+.upload-text {
+  font-size: 14px;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.upload-hint {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.spinner {
+  width: 24px;
+  height: 24px;
+  border: 2px solid var(--border-light);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+</style>
