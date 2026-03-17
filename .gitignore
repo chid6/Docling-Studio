@@ -18,11 +18,23 @@ Thumbs.db
 # Env
 .env
 .env.local
+.env.production
 
 # Uploads
 uploads/
+backend/uploads/
 
 # Python
 __pycache__/
 *.pyc
 .venv/
+*.egg-info/
+
+# Java
+*.class
+*.jar
+*.log
+hs_err_pid*
+
+# Docker
+docker-compose.override.yml

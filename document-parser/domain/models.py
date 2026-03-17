@@ -1,0 +1,69 @@
+"""Domain models — pure data structures with no framework dependencies."""
+
+from __future__ import annotations
+
+import enum
+import uuid
+from dataclasses import dataclass, field
+from datetime import datetime, timezone
+
+
+class AnalysisStatus(str, enum.Enum):
+    PENDING = "PENDING"
+    RUNNING = "RUNNING"
+    COMPLETED = "COMPLETED"
+    FAILED = "FAILED"
+
+
+def _utcnow() -> datetime:
+    return datetime.now(timezone.utc)
+
+
+def _new_id() -> str:
+    return str(uuid.uuid4())
+
+
+@dataclass
+class Document:
+    id: str = field(default_factory=_new_id)
+    filename: str = ""
+    content_type: str | None = None
+    file_size: int | None = None
+    page_count: int | None = None
+    storage_path: str = ""
+    created_at: datetime = field(default_factory=_utcnow)
+
+
+@dataclass
+class AnalysisJob:
+    id: str = field(default_factory=_new_id)
+    document_id: str = ""
+    status: AnalysisStatus = AnalysisStatus.PENDING
+    content_markdown: str | None = None
+    content_html: str | None = None
+    pages_json: str | None = None
+    error_message: str | None = None
+    started_at: datetime | None = None
+    completed_at: datetime | None = None
+    created_at: datetime = field(default_factory=_utcnow)
+
+    # Joined from document (not persisted separately)
+    document_filename: str | None = None
+
+    def mark_running(self) -> None:
+        self.status = AnalysisStatus.RUNNING
+        self.started_at = _utcnow()
+
+    def mark_completed(
+        self, markdown: str, html: str, pages_json: str,
+    ) -> None:
+        self.status = AnalysisStatus.COMPLETED
+        self.content_markdown = markdown
+        self.content_html = html
+        self.pages_json = pages_json
+        self.completed_at = _utcnow()
+
+    def mark_failed(self, error: str) -> None:
+        self.status = AnalysisStatus.FAILED
+        self.error_message = error
+        self.completed_at = _utcnow()

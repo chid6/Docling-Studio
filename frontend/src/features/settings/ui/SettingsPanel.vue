@@ -1,12 +1,8 @@
 <template>
   <div class="settings-panel">
     <div class="setting-group">
-      <label class="setting-label">Backend URL</label>
-      <input class="setting-input" v-model="store.backendUrl" readonly />
-    </div>
-    <div class="setting-group">
-      <label class="setting-label">Document Parser URL</label>
-      <input class="setting-input" v-model="store.parserUrl" readonly />
+      <label class="setting-label">API URL</label>
+      <input class="setting-input" v-model="store.apiUrl" readonly />
     </div>
     <div class="setting-group">
       <label class="setting-label">Version</label>

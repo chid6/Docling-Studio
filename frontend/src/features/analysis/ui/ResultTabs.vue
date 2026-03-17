@@ -83,17 +83,27 @@ const pageMarkdown = computed(() => {
 
 function formatElement(el) {
   if (!el.content) return ''
+  const indent = '  '.repeat(Math.max(0, (el.level || 0) - 1))
   switch (el.type) {
-    case 'section_header':
-      return `## ${el.content}`
+    case 'title':
+      return `# ${el.content}`
+    case 'section_header': {
+      // Use hierarchy level for heading depth (h2-h4)
+      const depth = Math.min(Math.max(el.level || 2, 2), 4)
+      return `${'#'.repeat(depth)} ${el.content}`
+    }
     case 'caption':
-      return `*${el.content}*`
+      return `${indent}*${el.content}*`
     case 'table':
       return el.content
     case 'formula':
-      return `$$${el.content}$$`
+      return `${indent}$$${el.content}$$`
+    case 'code':
+      return `${indent}\`\`\`\n${el.content}\n\`\`\``
+    case 'list':
+      return `${indent}- ${el.content}`
     default:
-      return el.content
+      return `${indent}${el.content}`
   }
 }
 </script>
