@@ -1,45 +1,18 @@
 services:
-  postgres:
-    image: postgres:16-alpine
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER:-app}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-app}
-      POSTGRES_DB: ${POSTGRES_DB:-docling_studio}
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-app} -d ${POSTGRES_DB:-docling_studio}"]
-      interval: 5s
-      timeout: 5s
-      retries: 10
-
   document-parser:
     build:
       context: ./document-parser
     ports:
       - "8000:8000"
+    volumes:
+      - uploads_data:/app/uploads
+      - db_data:/app/data
+    environment:
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000,http://localhost:5173}
     deploy:
       resources:
         limits:
           memory: 4g
-
-  backend:
-    build:
-      context: ./backend
-    ports:
-      - "8081:8081"
-    environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-docling_studio}
-      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-app}
-      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-app}
-      APP_DOCUMENT-PARSER_BASE-URL: http://document-parser:8000
-    volumes:
-      - uploads_data:/app/uploads
-    depends_on:
-      postgres:
-        condition: service_healthy
 
   frontend:
     build:
@@ -47,8 +20,8 @@ services:
     ports:
       - "3000:80"
     depends_on:
-      - backend
+      - document-parser
 
 volumes:
-  postgres_data:
   uploads_data:
+  db_data:

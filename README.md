@@ -27,24 +27,39 @@ Upload a PDF, configure the extraction pipeline, and visualize the results — t
 ## Architecture
 
 ```
-┌────────────┐     ┌──────────────┐     ┌──────────────────┐
-│  Frontend   │────▶│   Backend    │────▶│ Document Parser   │
-│  Vue 3      │     │ Spring Boot  │     │ FastAPI + Docling  │
-│  port 3000  │     │  port 8081   │     │   port 8000        │
-└────────────┘     └──────┬───────┘     └──────────────────┘
-                          │
-                   ┌──────▼───────┐
-                   │  PostgreSQL  │
-                   │  port 5432   │
-                   └──────────────┘
+┌────────────┐         ┌───────────────────────┐
+│  Frontend   │────────▶│   Document Parser      │
+│  Vue 3      │  /api/* │ FastAPI + Docling       │
+│  port 3000  │         │ SQLite + file storage   │
+└────────────┘         │   port 8000             │
+                        └───────────────────────┘
 ```
 
 | Service | Stack | Role |
 |---------|-------|------|
 | **frontend** | Vue 3, Vite, Pinia | UI, PDF viewer, results display |
-| **backend** | Spring Boot 3.3, Java 21, Liquibase | REST API, storage, orchestration |
-| **document-parser** | FastAPI, Docling, pdf2image | PDF parsing with configurable pipeline |
-| **postgres** | PostgreSQL 16 | Documents & analysis persistence |
+| **document-parser** | FastAPI, Docling, SQLite, pdf2image | REST API, document parsing, storage, persistence |
+
+### Python project structure (clean architecture)
+
+```
+document-parser/
+├── main.py                   # FastAPI app, CORS, lifespan
+├── domain/                   # Pure domain models & Docling logic
+│   ├── models.py             # Document, AnalysisJob dataclasses
+│   └── parsing.py            # Docling conversion & page extraction
+├── api/                      # HTTP layer (FastAPI routers)
+│   ├── schemas.py            # Pydantic DTOs (camelCase serialization)
+│   ├── documents.py          # /api/documents endpoints
+│   └── analyses.py           # /api/analyses endpoints
+├── persistence/              # Data layer (SQLite)
+│   ├── database.py           # Connection management, schema init
+│   ├── document_repo.py      # Document CRUD
+│   └── analysis_repo.py      # AnalysisJob CRUD
+└── services/                 # Use case orchestration
+    ├── document_service.py   # Upload, delete, preview
+    └── analysis_service.py   # Async Docling processing
+```
 
 ## Quick Start
 
@@ -52,10 +67,10 @@ Upload a PDF, configure the extraction pipeline, and visualize the results — t
 
 ```bash
 # Clone the repo
-git clone https://github.com/pjmalandrino/docling-studio.git
+git clone https://github.com/scub-france/docling-studio.git
 cd docling-studio
 
-# (Optional) customize credentials
+# (Optional) customize settings
 cp .env.example .env
 
 # Start all services
@@ -68,26 +83,12 @@ Open [http://localhost:3000](http://localhost:3000)
 
 ### Local Development
 
-Start only PostgreSQL via Docker:
-
-```bash
-docker compose -f docker-compose.dev.yml up -d
-```
-
-Then run each service locally:
-
 **Document Parser** (Python 3.12+):
 ```bash
 cd document-parser
 python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 uvicorn main:app --reload --port 8000
-```
-
-**Backend** (Java 21+):
-```bash
-cd backend
-./mvnw spring-boot:run
 ```
 
 **Frontend** (Node 20+):
@@ -115,12 +116,9 @@ All configuration is done via environment variables. See [`.env.example`](.env.e
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `POSTGRES_USER` | `app` | Database user |
-| `POSTGRES_PASSWORD` | `app` | Database password |
-| `POSTGRES_DB` | `docling_studio` | Database name |
-| `APP_CORS_ALLOWED_ORIGINS` | `http://localhost:3000,...` | CORS allowed origins (comma-separated) |
-| `APP_DOCUMENT-PARSER_BASE-URL` | `http://localhost:8000` | Document parser URL |
-| `APP_STORAGE_PATH` | `./uploads` | File storage directory |
+| `CORS_ORIGINS` | `http://localhost:3000,...` | CORS allowed origins (comma-separated) |
+| `UPLOAD_DIR` | `./uploads` | File storage directory |
+| `DB_PATH` | `./data/docling_studio.db` | SQLite database path |
 
 ## Performance & System Requirements
 
@@ -161,9 +159,7 @@ All Docker images are **multi-arch** (linux/amd64 + linux/arm64). Works natively
 ## Tech Stack
 
 - **Frontend**: Vue 3 + Vite + Pinia
-- **Backend**: Spring Boot 3.3 + Java 21 + Liquibase + PDFBox
-- **Parser**: FastAPI + Docling 2.x + PyTorch + pdf2image
-- **Database**: PostgreSQL 16
+- **Backend**: FastAPI + Docling 2.x + SQLite + pdf2image
 - **Infra**: Docker Compose + Nginx
 
 ## Contributing
