@@ -279,10 +279,11 @@ function addMore() {
   documentStore.selectedId = null
 }
 
-// Auto-switch to verifier when analysis completes
+// Auto-switch to verifier when analysis completes + refresh document data (pageCount)
 watch(() => analysisStore.currentAnalysis?.status, (status) => {
   if (status === 'COMPLETED') {
     mode.value = 'verifier'
+    documentStore.load()
   }
 })
 
