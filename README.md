@@ -92,17 +92,23 @@ frontend/src/
 
 ## Quick Start
 
-### Docker Compose (recommended)
+### Docker (fastest)
+
+```bash
+docker run -p 3000:3000 ghcr.io/scub-france/docling-studio:latest
+```
+
+Open [http://localhost:3000](http://localhost:3000)
+
+> **Note:** The first analysis takes longer as Docling downloads its ML models (~400 MB). Subsequent runs are fast.
+
+### Docker Compose (for development)
 
 ```bash
 git clone https://github.com/scub-france/Docling-Studio.git
 cd Docling-Studio
 docker compose up --build
 ```
-
-Open [http://localhost:3000](http://localhost:3000)
-
-> **Note:** The first analysis takes longer as Docling downloads its ML models (~400 MB). Subsequent runs are fast.
 
 ### Local Development
 
@@ -162,14 +168,20 @@ All configuration is done via environment variables. See [`.env.example`](.env.e
 | `DB_PATH` | `./data/docling_studio.db` | SQLite database path |
 | `CONVERSION_TIMEOUT` | `600` | Max seconds for a single Docling conversion |
 
-## CI
+## CI / Release
 
-GitHub Actions runs on every push to `main` and on pull requests:
+GitHub Actions pipelines (see [`.github/workflows/`](.github/workflows/)):
 
-- **Backend job** — Python 3.12, pytest (99 tests)
-- **Frontend job** — Node 20, vitest (87 tests) + vite build
+| Workflow | Trigger | What it does |
+|----------|---------|--------------|
+| **CI** | push to `main`, pull requests | Backend tests (99) + Frontend tests (87) + build |
+| **Release** | push tag `v*` | Build & push multi-arch Docker image to `ghcr.io` |
 
-Both jobs run in parallel. See [`.github/workflows/ci.yml`](.github/workflows/ci.yml).
+To publish a new version:
+```bash
+git tag v0.2.0
+git push origin v0.2.0
+```
 
 ## Performance & System Requirements
 

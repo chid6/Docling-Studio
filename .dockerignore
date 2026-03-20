@@ -1,0 +1,20 @@
+.git/
+.github/
+*.md
+LICENSE
+.env
+.env.*
+
+# Frontend build artifacts
+frontend/node_modules/
+frontend/dist/
+
+# Backend dev artifacts
+document-parser/.venv/
+document-parser/__pycache__/
+document-parser/*.pyc
+document-parser/.pytest_cache/
+document-parser/.mypy_cache/
+document-parser/.ruff_cache/
+document-parser/data/
+document-parser/uploads/
