@@ -132,8 +132,16 @@
         </div>
       </div>
 
+      <!-- Resize handle -->
+      <div
+        class="resize-handle"
+        @mousedown="onResizeStart"
+      >
+        <div class="resize-grip" />
+      </div>
+
       <!-- Right: Config or Results panel -->
-      <div class="right-panel">
+      <div class="right-panel" :style="{ width: rightPanelWidth + 'px' }">
         <!-- CONFIGURER MODE -->
         <div v-if="mode === 'configurer'" class="config-panel">
           <div class="config-section">
@@ -290,6 +298,38 @@ const visualMode = ref(false)
 const pdfImageRef = ref(null)
 const bboxOverlayRef = ref(null)
 
+// --- Resizable right panel ---
+const RIGHT_PANEL_MIN = 280
+const RIGHT_PANEL_MAX_RATIO = 0.7
+const rightPanelWidth = ref(380)
+let resizing = false
+
+function onResizeStart(e) {
+  e.preventDefault()
+  resizing = true
+  document.body.style.cursor = 'col-resize'
+  document.body.style.userSelect = 'none'
+  document.addEventListener('mousemove', onResizeMove)
+  document.addEventListener('mouseup', onResizeEnd)
+}
+
+function onResizeMove(e) {
+  if (!resizing) return
+  const maxWidth = window.innerWidth * RIGHT_PANEL_MAX_RATIO
+  const newWidth = window.innerWidth - e.clientX
+  rightPanelWidth.value = Math.max(RIGHT_PANEL_MIN, Math.min(newWidth, maxWidth))
+}
+
+function onResizeEnd() {
+  resizing = false
+  document.body.style.cursor = ''
+  document.body.style.userSelect = ''
+  document.removeEventListener('mousemove', onResizeMove)
+  document.removeEventListener('mouseup', onResizeEnd)
+  // Redraw bbox overlay after resize
+  nextTick(() => bboxOverlayRef.value?.draw())
+}
+
 const pipelineOptions = reactive({
   do_ocr: true,
   do_table_structure: true,
@@ -371,6 +411,8 @@ onMounted(async () => {
 
 onBeforeUnmount(() => {
   analysisStore.stopPolling()
+  document.removeEventListener('mousemove', onResizeMove)
+  document.removeEventListener('mouseup', onResizeEnd)
 })
 </script>
 
@@ -640,18 +682,69 @@ onBeforeUnmount(() => {
 /* Main content */
 .studio-main {
   flex: 1;
-  display: grid;
-  grid-template-columns: 1fr 380px;
+  display: flex;
   overflow: hidden;
 }
 
-/* PDF Viewer */
+/* PDF Viewer fills remaining space */
 .pdf-viewer-panel {
+  flex: 1;
+  min-width: 200px;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  border-right: 1px solid var(--border);
 }
+
+/* Resize handle */
+.resize-handle {
+  width: 6px;
+  cursor: col-resize;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 5;
+  transition: background var(--transition);
+}
+
+.resize-handle::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 2px;
+  width: 1px;
+  background: var(--border);
+  transition: background var(--transition);
+}
+
+.resize-handle:hover::before,
+.resize-handle:active::before {
+  background: var(--accent);
+}
+
+.resize-handle:hover,
+.resize-handle:active {
+  background: var(--accent-muted);
+}
+
+.resize-grip {
+  width: 3px;
+  height: 24px;
+  border-radius: 2px;
+  background: var(--border-light);
+  opacity: 0;
+  transition: opacity var(--transition);
+}
+
+.resize-handle:hover .resize-grip {
+  opacity: 1;
+  background: var(--accent);
+}
+
+/* PDF Viewer — flex: 1 set above in .studio-main context */
 
 .pdf-nav-bar {
   display: flex;
@@ -779,12 +872,16 @@ onBeforeUnmount(() => {
   border-radius: 2px;
 }
 
-/* Right panel */
+/* Right panel — width set via inline style */
 .right-panel {
   overflow: hidden;
   display: flex;
   flex-direction: column;
   background: var(--bg);
+  flex-shrink: 0;
+  min-width: 280px;
+  max-width: 70vw;
+  border-left: 1px solid var(--border);
 }
 
 /* Config panel */
