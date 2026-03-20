@@ -3,6 +3,11 @@ import { createRouter, createWebHistory } from 'vue-router'
 const routes = [
   {
     path: '/',
+    name: 'home',
+    component: () => import('../../pages/HomePage.vue')
+  },
+  {
+    path: '/studio',
     name: 'studio',
     component: () => import('../../pages/StudioPage.vue')
   },
@@ -10,6 +15,11 @@ const routes = [
     path: '/history',
     name: 'history',
     component: () => import('../../pages/HistoryPage.vue')
+  },
+  {
+    path: '/documents',
+    name: 'documents',
+    component: () => import('../../pages/DocumentsPage.vue')
   },
   {
     path: '/settings',

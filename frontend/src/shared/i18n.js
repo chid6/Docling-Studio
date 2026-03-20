@@ -3,9 +3,23 @@ import { useSettingsStore } from '../features/settings/store.js'
 const messages = {
   fr: {
     // Sidebar
+    'nav.home': 'Accueil',
     'nav.studio': 'Studio',
+    'nav.documents': 'Documents',
     'nav.history': 'Historique',
     'nav.settings': 'Paramètres',
+    'nav.collapse': 'Réduire la barre latérale',
+    'nav.expand': 'Développer la barre latérale',
+
+    // Top bar
+    'topbar.newAnalysis': 'Nouvelle analyse',
+
+    // Home
+    'home.title': 'Docling Studio',
+    'home.subtitle': 'Analysez, explorez et validez la structure de vos documents PDF grâce à Docling.',
+    'home.documents': 'Documents',
+    'home.analyses': 'Analyses',
+    'home.recentDocs': 'Documents récents',
 
     // Studio — import
     'studio.title': 'Intelligence des documents',
@@ -84,9 +98,21 @@ const messages = {
     'settings.language': 'Langue',
   },
   en: {
+    'nav.home': 'Home',
     'nav.studio': 'Studio',
+    'nav.documents': 'Documents',
     'nav.history': 'History',
     'nav.settings': 'Settings',
+    'nav.collapse': 'Collapse sidebar',
+    'nav.expand': 'Expand sidebar',
+
+    'topbar.newAnalysis': 'New analysis',
+
+    'home.title': 'Docling Studio',
+    'home.subtitle': 'Analyze, explore and validate the structure of your PDF documents with Docling.',
+    'home.documents': 'Documents',
+    'home.analyses': 'Analyses',
+    'home.recentDocs': 'Recent documents',
 
     'studio.title': 'Document Intelligence',
     'studio.subtitle': 'Upload a PDF document to start analyzing with Docling',
