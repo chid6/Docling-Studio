@@ -156,7 +156,7 @@
                 <span class="toggle-switch" />
                 <span class="toggle-text">{{ t('config.ocr') }}</span>
               </label>
-              <span class="config-hint" :title="t('config.ocrHint')">?</span>
+              <span class="config-hint"><span class="config-tooltip">{{ t('config.ocrHint') }}</span>?</span>
             </div>
 
             <div class="config-toggle-row">
@@ -165,7 +165,7 @@
                 <span class="toggle-switch" />
                 <span class="toggle-text">{{ t('config.tableStructure') }}</span>
               </label>
-              <span class="config-hint" :title="t('config.tableStructureHint')">?</span>
+              <span class="config-hint"><span class="config-tooltip">{{ t('config.tableStructureHint') }}</span>?</span>
             </div>
 
             <div class="config-sub-option" v-if="pipelineOptions.do_table_structure">
@@ -187,7 +187,7 @@
                 <span class="toggle-switch" />
                 <span class="toggle-text">{{ t('config.codeEnrichment') }}</span>
               </label>
-              <span class="config-hint" :title="t('config.codeEnrichmentHint')">?</span>
+              <span class="config-hint"><span class="config-tooltip">{{ t('config.codeEnrichmentHint') }}</span>?</span>
             </div>
 
             <div class="config-toggle-row">
@@ -196,7 +196,7 @@
                 <span class="toggle-switch" />
                 <span class="toggle-text">{{ t('config.formulaEnrichment') }}</span>
               </label>
-              <span class="config-hint" :title="t('config.formulaEnrichmentHint')">?</span>
+              <span class="config-hint"><span class="config-tooltip">{{ t('config.formulaEnrichmentHint') }}</span>?</span>
             </div>
           </div>
 
@@ -210,7 +210,7 @@
                 <span class="toggle-switch" />
                 <span class="toggle-text">{{ t('config.pictureClassification') }}</span>
               </label>
-              <span class="config-hint" :title="t('config.pictureClassificationHint')">?</span>
+              <span class="config-hint"><span class="config-tooltip">{{ t('config.pictureClassificationHint') }}</span>?</span>
             </div>
 
             <div class="config-toggle-row">
@@ -219,7 +219,7 @@
                 <span class="toggle-switch" />
                 <span class="toggle-text">{{ t('config.pictureDescription') }}</span>
               </label>
-              <span class="config-hint" :title="t('config.pictureDescriptionHint')">?</span>
+              <span class="config-hint"><span class="config-tooltip">{{ t('config.pictureDescriptionHint') }}</span>?</span>
             </div>
 
             <div class="config-toggle-row">
@@ -228,7 +228,7 @@
                 <span class="toggle-switch" />
                 <span class="toggle-text">{{ t('config.generatePictureImages') }}</span>
               </label>
-              <span class="config-hint" :title="t('config.generatePictureImagesHint')">?</span>
+              <span class="config-hint"><span class="config-tooltip">{{ t('config.generatePictureImagesHint') }}</span>?</span>
             </div>
 
             <div class="config-toggle-row">
@@ -237,7 +237,7 @@
                 <span class="toggle-switch" />
                 <span class="toggle-text">{{ t('config.generatePageImages') }}</span>
               </label>
-              <span class="config-hint" :title="t('config.generatePageImagesHint')">?</span>
+              <span class="config-hint"><span class="config-tooltip">{{ t('config.generatePageImagesHint') }}</span>?</span>
             </div>
 
             <div class="config-sub-option" v-if="pipelineOptions.generate_picture_images || pipelineOptions.generate_page_images">
@@ -791,6 +791,7 @@ onMounted(() => {
 }
 
 .config-hint {
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -801,6 +802,43 @@ onMounted(() => {
   font-size: 10px;
   color: var(--text-muted);
   cursor: help;
+  flex-shrink: 0;
+}
+
+.config-hint:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.config-tooltip {
+  display: none;
+  position: absolute;
+  bottom: calc(100% + 8px);
+  right: -8px;
+  width: 240px;
+  padding: 8px 10px;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-light);
+  border-radius: 6px;
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--text-secondary);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 100;
+  pointer-events: none;
+}
+
+.config-tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  right: 12px;
+  border: 5px solid transparent;
+  border-top-color: var(--border-light);
+}
+
+.config-hint:hover .config-tooltip {
+  display: block;
 }
 
 .config-select-display {
