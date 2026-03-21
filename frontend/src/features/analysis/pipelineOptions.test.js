@@ -1,6 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { setActivePinia, createPinia } from 'pinia'
-import { createAnalysis } from './api.js'
 import { useAnalysisStore } from './store.js'
 
 vi.mock('../../shared/api/http.js', () => ({
@@ -14,7 +13,6 @@ vi.mock('./api.js', () => ({
   deleteAnalysis: vi.fn(),
 }))
 
-import { apiFetch } from '../../shared/api/http.js'
 import * as api from './api.js'
 
 // ---------------------------------------------------------------------------
@@ -22,9 +20,6 @@ import * as api from './api.js'
 // ---------------------------------------------------------------------------
 
 describe('createAnalysis — pipeline options body construction', () => {
-  // For these tests we need the REAL createAnalysis, not the mock.
-  // So we re-import the actual module.
-  let realCreateAnalysis
 
   beforeEach(() => {
     vi.clearAllMocks()

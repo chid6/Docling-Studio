@@ -1,6 +1,6 @@
 """Tests for domain models."""
 
-from datetime import datetime, timezone
+from datetime import datetime
 
 from domain.models import AnalysisJob, AnalysisStatus, Document
 

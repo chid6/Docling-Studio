@@ -6,17 +6,18 @@ per-page elements with bounding boxes and hierarchy levels.
 
 from __future__ import annotations
 
+import contextlib
 import logging
 import threading
 from dataclasses import dataclass, field
 
-from docling.document_converter import DocumentConverter, PdfFormatOption
 from docling.datamodel.base_models import InputFormat
 from docling.datamodel.pipeline_options import (
     PdfPipelineOptions,
     TableFormerMode,
     TableStructureOptions,
 )
+from docling.document_converter import DocumentConverter, PdfFormatOption
 from docling_core.types.doc import (
     CodeItem,
     DocItem,
@@ -215,10 +216,8 @@ def _process_content_item(
 
             content = getattr(item, "text", "") or ""
             if isinstance(item, TableItem):
-                try:
+                with contextlib.suppress(AttributeError, ValueError):
                     content = item.export_to_markdown()
-                except (AttributeError, ValueError):
-                    pass
 
             pages[page_no].elements.append(
                 PageElement(type=element_type, bbox=bbox, content=content, level=level)

@@ -1,6 +1,5 @@
 """Tests for API schemas — camelCase serialization and validation."""
 
-from datetime import datetime
 
 import pytest
 
