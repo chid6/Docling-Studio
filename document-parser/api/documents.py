@@ -44,7 +44,7 @@ async def upload(file: UploadFile):
             file_content=content,
         )
     except ValueError as e:
-        raise HTTPException(status_code=413, detail=str(e))
+        raise HTTPException(status_code=413, detail=str(e)) from e
 
     return _to_response(doc)
 
@@ -90,7 +90,7 @@ async def preview(
         png_bytes = document_service.generate_preview(file_content, page=page, dpi=dpi)
         return Response(content=png_bytes, media_type="image/png")
     except ValueError as e:
-        raise HTTPException(status_code=404, detail=str(e))
-    except Exception:
+        raise HTTPException(status_code=404, detail=str(e)) from e
+    except Exception as exc:
         logger.exception("Failed to generate preview")
-        raise HTTPException(status_code=422, detail="Failed to generate preview")
+        raise HTTPException(status_code=422, detail="Failed to generate preview") from exc

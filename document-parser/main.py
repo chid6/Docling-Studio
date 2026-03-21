@@ -14,9 +14,9 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from persistence.database import init_db
-from api.documents import router as documents_router
 from api.analyses import router as analyses_router
+from api.documents import router as documents_router
+from persistence.database import init_db
 
 logging.basicConfig(
     level=logging.INFO,

@@ -96,7 +96,7 @@ async def _run_analysis(
 
         logger.info("Analysis completed: %s (%d pages)", job_id, result.page_count)
 
-    except asyncio.TimeoutError:
+    except TimeoutError:
         logger.error("Analysis timed out after %ds: %s", CONVERSION_TIMEOUT, job_id)
         await _mark_failed(job_id, f"Conversion timed out after {CONVERSION_TIMEOUT}s")
 

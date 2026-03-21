@@ -5,7 +5,7 @@ from unittest.mock import AsyncMock, patch
 import pytest
 from fastapi.testclient import TestClient
 
-from domain.models import AnalysisJob, AnalysisStatus, Document
+from domain.models import AnalysisJob, Document
 from main import app
 
 

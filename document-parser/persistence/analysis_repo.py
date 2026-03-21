@@ -18,7 +18,7 @@ def _row_to_job(row) -> AnalysisJob:
         started_at=row["started_at"],
         completed_at=row["completed_at"],
         created_at=row["created_at"],
-        document_filename=row["filename"] if "filename" in row.keys() else None,
+        document_filename=row["filename"] if "filename" in row.keys() else None,  # noqa: SIM118
     )
 
 

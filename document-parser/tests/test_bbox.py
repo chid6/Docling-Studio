@@ -33,8 +33,8 @@ class TestToTopleftList:
         bbox = BoundingBox(l=10, t=500, r=300, b=100, coord_origin=CoordOrigin.BOTTOMLEFT)
         result = to_topleft_list(bbox, page_height=800.0)
 
-        l, t, r, b = result
-        assert r > l, "width should be positive"
+        left, t, r, b = result
+        assert r > left, "width should be positive"
         assert b > t, "height should be positive"
 
     def test_full_page_bbox_bottomleft(self):

@@ -1,11 +1,10 @@
 """Tests for persistence repositories using a temporary SQLite database."""
 
-import os
 
 import pytest
 
 from domain.models import AnalysisJob, AnalysisStatus, Document
-from persistence import document_repo, analysis_repo
+from persistence import analysis_repo, document_repo
 from persistence.database import init_db
 
 

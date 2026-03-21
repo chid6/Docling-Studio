@@ -42,7 +42,7 @@ async def create_analysis(body: CreateAnalysisRequest):
     try:
         job = await analysis_service.create(body.documentId, pipeline_options=pipeline_opts)
     except ValueError as e:
-        raise HTTPException(status_code=404, detail=str(e))
+        raise HTTPException(status_code=404, detail=str(e)) from e
 
     return _to_response(job)
 

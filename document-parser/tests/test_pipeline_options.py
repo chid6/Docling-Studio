@@ -2,8 +2,7 @@
 
 from __future__ import annotations
 
-import asyncio
-from unittest.mock import AsyncMock, MagicMock, patch, call
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 from docling.datamodel.base_models import InputFormat
@@ -12,8 +11,11 @@ from docling.datamodel.pipeline_options import (
     TableFormerMode,
 )
 
-from domain.parsing import ConversionOptions, build_converter, convert_document, get_default_converter
-
+from domain.parsing import (
+    ConversionOptions,
+    build_converter,
+    convert_document,
+)
 
 # ---------------------------------------------------------------------------
 # build_converter — verifies Docling pipeline options are wired correctly
@@ -452,6 +454,7 @@ class TestAnalysisEndpointPipelineOptions:
     @pytest.fixture
     def client(self):
         from fastapi.testclient import TestClient
+
         from main import app
         return TestClient(app, raise_server_exceptions=False)
 
