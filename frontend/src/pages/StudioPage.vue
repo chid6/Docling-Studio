@@ -26,13 +26,17 @@
             class="toggle-btn"
             :class="{ active: mode === 'configurer' }"
             @click="mode = 'configurer'"
-          >{{ t('studio.configure') }}</button>
+          >
+            {{ t('studio.configure') }}
+          </button>
           <button
             class="toggle-btn"
             :class="{ active: mode === 'verifier' }"
             @click="mode = 'verifier'"
             :disabled="!analysisStore.currentAnalysis"
-          >{{ t('studio.verify') }}</button>
+          >
+            {{ t('studio.verify') }}
+          </button>
         </div>
       </div>
       <div class="topbar-actions">

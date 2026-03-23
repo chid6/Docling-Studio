@@ -10,7 +10,6 @@ from docling_core.types.doc.base import BoundingBox, CoordOrigin
 
 from domain.bbox import EMPTY_BBOX, to_topleft_list
 
-
 # ---------------------------------------------------------------------------
 # Standard conversions
 # ---------------------------------------------------------------------------
@@ -65,7 +64,7 @@ class TestPageFormats:
     """Verify correct conversion across different page sizes."""
 
     def test_a4_page(self):
-        """A4 page (595.28 × 841.89 pt) — most common non-US format."""
+        """A4 page (595.28 x 841.89 pt) -- most common non-US format."""
         page_height = 841.89
         bbox = BoundingBox(l=72, t=769.89, r=523.28, b=72, coord_origin=CoordOrigin.BOTTOMLEFT)
         result = to_topleft_list(bbox, page_height=page_height)
@@ -76,14 +75,14 @@ class TestPageFormats:
         assert result[3] == pytest.approx(page_height - 72)  # ~769.89
 
     def test_a3_page(self):
-        """A3 page (841.89 × 1190.55 pt)."""
+        """A3 page (841.89 x 1190.55 pt)."""
         page_height = 1190.55
         bbox = BoundingBox(l=0, t=1190.55, r=841.89, b=0, coord_origin=CoordOrigin.BOTTOMLEFT)
         result = to_topleft_list(bbox, page_height=page_height)
         assert result == pytest.approx([0, 0, 841.89, 1190.55])
 
     def test_legal_page(self):
-        """US Legal page (612 × 1008 pt)."""
+        """US Legal page (612 x 1008 pt)."""
         page_height = 1008.0
         bbox = BoundingBox(l=50, t=50, r=562, b=958, coord_origin=CoordOrigin.TOPLEFT)
         result = to_topleft_list(bbox, page_height=page_height)

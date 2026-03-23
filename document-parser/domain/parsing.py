@@ -208,7 +208,7 @@ def _process_content_item(
                 # Docling edge case). US Letter dimensions are used as a safe default.
                 # This may cause slight bbox misalignment on non-Letter pages (e.g. A4).
                 logger.warning(
-                    "Page %d not found in document metadata — using US Letter fallback (%s×%s pt)",
+                    "Page %d not found in document metadata — using US Letter fallback (%sx%s pt)",
                     page_no, _DEFAULT_PAGE_WIDTH, _DEFAULT_PAGE_HEIGHT,
                 )
                 pages[page_no] = PageDetail(page_number=page_no, width=_DEFAULT_PAGE_WIDTH, height=_DEFAULT_PAGE_HEIGHT)

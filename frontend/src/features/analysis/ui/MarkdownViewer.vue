@@ -1,4 +1,5 @@
 <template>
+  <!-- eslint-disable-next-line vue/no-v-html -- sanitized by DOMPurify -->
   <div class="markdown-viewer" v-html="rendered" />
 </template>
 
