@@ -27,6 +27,8 @@ import { ref } from 'vue'
 import { useDocumentStore } from '../store'
 import { useI18n } from '../../../shared/i18n'
 
+const emit = defineEmits<{ uploaded: [docId: number] }>()
+
 const store = useDocumentStore()
 const { t } = useI18n()
 const fileInput = ref<HTMLInputElement | null>(null)
@@ -39,7 +41,10 @@ function openFilePicker() {
 async function onFileSelect(e: Event) {
   const target = e.target as HTMLInputElement
   const file = target.files?.[0]
-  if (file) await store.upload(file)
+  if (file) {
+    const doc = await store.upload(file)
+    if (doc) emit('uploaded', doc.id)
+  }
   target.value = ''
 }
 
@@ -47,7 +52,8 @@ async function onDrop(e: DragEvent) {
   dragging.value = false
   const file = e.dataTransfer?.files?.[0]
   if (file && file.type === 'application/pdf') {
-    await store.upload(file)
+    const doc = await store.upload(file)
+    if (doc) emit('uploaded', doc.id)
   }
 }
 </script>
