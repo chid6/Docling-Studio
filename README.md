@@ -9,7 +9,7 @@
 A visual document analysis studio powered by [Docling](https://github.com/DS4SD/docling).
 Upload a PDF, configure the extraction pipeline, and visualize the results — text, tables, images, formulas, bounding boxes — all from your browser.
 
-![Docling Studio — Execution Result](docs/screenshots/DS-execution-result.png)
+![Docling Studio — Presentation](docs/screenshots/presentation.gif)
 
 ## Features
 
