@@ -11,7 +11,7 @@
 
       <!-- Quick upload -->
       <div class="home-upload">
-        <DocumentUpload />
+        <DocumentUpload @uploaded="onUploaded" />
       </div>
 
       <!-- Stats -->
@@ -70,6 +70,10 @@ const { t } = useI18n()
 const docCount = computed(() => documentStore.documents.length)
 const analysisCount = computed(() => historyStore.analyses.length)
 const recentDocs = computed(() => documentStore.documents.slice(0, 5))
+
+function onUploaded() {
+  router.push('/studio')
+}
 
 function openInStudio(doc: Document) {
   documentStore.select(doc.id)
