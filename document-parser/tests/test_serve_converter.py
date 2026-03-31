@@ -147,6 +147,21 @@ class TestParseResponse:
         result = _parse_response(data)
         assert result.page_count == 1
 
+    def test_json_content_malformed_string_falls_back(self):
+        """Bug #5: malformed JSON string in json_content must not crash."""
+        data = {
+            "document": {
+                "md_content": "# Hello",
+                "html_content": "<h1>Hello</h1>",
+                "json_content": "NOT VALID JSON {{{",
+            }
+        }
+        result = _parse_response(data)
+        assert isinstance(result, ConversionResult)
+        assert result.content_markdown == "# Hello"
+        assert result.pages == []
+        assert result.page_count == 1
+
     def test_tables_and_pictures(self):
         data = {
             "document": {

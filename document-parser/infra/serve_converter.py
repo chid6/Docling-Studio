@@ -138,7 +138,11 @@ def _parse_response(data: dict) -> ConversionResult:
     # json_content contains the full DoclingDocument with pages, elements, bboxes
     json_content = document.get("json_content")
     if isinstance(json_content, str):
-        json_content = json.loads(json_content)
+        try:
+            json_content = json.loads(json_content)
+        except json.JSONDecodeError:
+            logger.warning("Failed to parse json_content as JSON, ignoring structured data")
+            json_content = None
 
     pages: list[PageDetail] = []
     if json_content:

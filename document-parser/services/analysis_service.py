@@ -7,6 +7,7 @@ from the conversion implementation (local Docling lib vs remote Docling Serve).
 from __future__ import annotations
 
 import asyncio
+import functools
 import json
 import logging
 from dataclasses import asdict
@@ -42,7 +43,7 @@ class AnalysisService:
         task = asyncio.create_task(
             self._run_analysis(job.id, doc.storage_path, doc.filename, pipeline_options)
         )
-        task.add_done_callback(_on_task_done)
+        task.add_done_callback(functools.partial(_on_task_done, job_id=job.id))
 
         return job
 
@@ -99,14 +100,16 @@ class AnalysisService:
             await _mark_failed(job_id, str(e))
 
 
-def _on_task_done(task: asyncio.Task) -> None:
-    """Log unhandled exceptions from background analysis tasks."""
+def _on_task_done(task: asyncio.Task, *, job_id: str) -> None:
+    """Log unhandled exceptions from background analysis tasks and mark job as FAILED."""
     if task.cancelled():
-        logger.warning("Analysis task was cancelled")
+        logger.warning("Analysis task was cancelled: %s", job_id)
+        asyncio.ensure_future(_mark_failed(job_id, "Task was cancelled"))
         return
     exc = task.exception()
     if exc:
-        logger.error("Unhandled exception in analysis task: %s", exc, exc_info=True)
+        logger.error("Unhandled exception in analysis task %s: %s", job_id, exc, exc_info=True)
+        asyncio.ensure_future(_mark_failed(job_id, str(exc)))
 
 
 async def _mark_failed(job_id: str, error: str) -> None:
