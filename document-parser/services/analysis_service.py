@@ -100,16 +100,26 @@ class AnalysisService:
             await _mark_failed(job_id, str(e))
 
 
+_background_tasks: set[asyncio.Task] = set()
+
+
 def _on_task_done(task: asyncio.Task, *, job_id: str) -> None:
     """Log unhandled exceptions from background analysis tasks and mark job as FAILED."""
     if task.cancelled():
         logger.warning("Analysis task was cancelled: %s", job_id)
-        asyncio.ensure_future(_mark_failed(job_id, "Task was cancelled"))
+        _schedule_mark_failed(job_id, "Task was cancelled")
         return
     exc = task.exception()
     if exc:
         logger.error("Unhandled exception in analysis task %s: %s", job_id, exc, exc_info=True)
-        asyncio.ensure_future(_mark_failed(job_id, str(exc)))
+        _schedule_mark_failed(job_id, str(exc))
+
+
+def _schedule_mark_failed(job_id: str, error: str) -> None:
+    """Schedule _mark_failed as a tracked background task."""
+    t = asyncio.ensure_future(_mark_failed(job_id, error))
+    _background_tasks.add(t)
+    t.add_done_callback(_background_tasks.discard)
 
 
 async def _mark_failed(job_id: str, error: str) -> None:

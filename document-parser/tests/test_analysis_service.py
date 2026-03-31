@@ -40,12 +40,12 @@ class TestOnTaskDone:
         async def slow_task():
             await asyncio.sleep(999)
 
+        import contextlib
+
         task = asyncio.create_task(slow_task())
         task.cancel()
-        try:
+        with contextlib.suppress(asyncio.CancelledError):
             await task
-        except asyncio.CancelledError:
-            pass
 
         with patch("services.analysis_service._mark_failed", new_callable=AsyncMock) as mock_mark:
             _on_task_done(task, job_id=job_id)
