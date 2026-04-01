@@ -11,6 +11,8 @@ site/
 .vscode/
 .run/
 .claude/
+CLAUDE.md
+*/CLAUDE.md
 *.iml
 
 # OS
