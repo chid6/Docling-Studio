@@ -40,6 +40,7 @@ def _build_converter():
     """Build the converter adapter based on configuration."""
     if settings.conversion_engine == "remote":
         from infra.serve_converter import ServeConverter
+
         logger.info("Using remote Docling Serve at %s", settings.docling_serve_url)
         return ServeConverter(
             base_url=settings.docling_serve_url,
@@ -47,14 +48,26 @@ def _build_converter():
         )
     else:
         from infra.local_converter import LocalConverter
+
         logger.info("Using local Docling converter")
         return LocalConverter()
 
 
+def _build_chunker():
+    """Build the chunker adapter — only available in local mode."""
+    if settings.conversion_engine == "local":
+        from infra.local_chunker import LocalChunker
+
+        return LocalChunker()
+    return None
+
+
 def _build_analysis_service() -> AnalysisService:
     converter = _build_converter()
+    chunker = _build_chunker()
     return AnalysisService(
         converter=converter,
+        chunker=chunker,
         conversion_timeout=settings.conversion_timeout,
     )
 
@@ -62,6 +75,7 @@ def _build_analysis_service() -> AnalysisService:
 # ---------------------------------------------------------------------------
 # FastAPI app
 # ---------------------------------------------------------------------------
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):

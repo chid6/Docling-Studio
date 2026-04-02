@@ -28,8 +28,15 @@ async def insert(doc: Document) -> None:
         await db.execute(
             """INSERT INTO documents (id, filename, content_type, file_size, page_count, storage_path, created_at)
                VALUES (?, ?, ?, ?, ?, ?, ?)""",
-            (doc.id, doc.filename, doc.content_type, doc.file_size,
-             doc.page_count, doc.storage_path, str(doc.created_at)),
+            (
+                doc.id,
+                doc.filename,
+                doc.content_type,
+                doc.file_size,
+                doc.page_count,
+                doc.storage_path,
+                str(doc.created_at),
+            ),
         )
         await db.commit()
 

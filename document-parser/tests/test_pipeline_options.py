@@ -23,6 +23,7 @@ from infra.local_converter import (
 # build_converter — verifies Docling pipeline options are wired correctly
 # ---------------------------------------------------------------------------
 
+
 class TestBuildConverter:
     """Verify that build_converter produces a DocumentConverter with the right PdfPipelineOptions."""
 
@@ -101,18 +102,20 @@ class TestBuildConverter:
         assert opts.images_scale == 2.0
 
     def test_all_options_combined(self):
-        conv = build_converter(ConversionOptions(
-            do_ocr=False,
-            do_table_structure=True,
-            table_mode="fast",
-            do_code_enrichment=True,
-            do_formula_enrichment=True,
-            do_picture_classification=True,
-            do_picture_description=True,
-            generate_picture_images=True,
-            generate_page_images=True,
-            images_scale=1.5,
-        ))
+        conv = build_converter(
+            ConversionOptions(
+                do_ocr=False,
+                do_table_structure=True,
+                table_mode="fast",
+                do_code_enrichment=True,
+                do_formula_enrichment=True,
+                do_picture_classification=True,
+                do_picture_description=True,
+                generate_picture_images=True,
+                generate_page_images=True,
+                images_scale=1.5,
+            )
+        )
         opts = self._get_pipeline_options(conv)
         assert opts.do_ocr is False
         assert opts.do_table_structure is True
@@ -130,6 +133,7 @@ class TestBuildConverter:
 # convert_document — default vs custom converter routing
 # ---------------------------------------------------------------------------
 
+
 class TestConvertDocumentRouting:
     """Verify convert_document uses default converter for default opts, custom otherwise."""
 
@@ -142,6 +146,7 @@ class TestConvertDocumentRouting:
         mock_result.document.iterate_items.return_value = []
         mock_result.document.export_to_markdown.return_value = ""
         mock_result.document.export_to_html.return_value = ""
+        mock_result.document.export_to_dict.return_value = {}
         mock_conv.convert.return_value = mock_result
         mock_get_default.return_value = mock_conv
 
@@ -159,6 +164,7 @@ class TestConvertDocumentRouting:
         mock_result.document.iterate_items.return_value = []
         mock_result.document.export_to_markdown.return_value = ""
         mock_result.document.export_to_html.return_value = ""
+        mock_result.document.export_to_dict.return_value = {}
         mock_conv.convert.return_value = mock_result
         mock_build.return_value = mock_conv
 
@@ -176,6 +182,7 @@ class TestConvertDocumentRouting:
         mock_result.document.iterate_items.return_value = []
         mock_result.document.export_to_markdown.return_value = ""
         mock_result.document.export_to_html.return_value = ""
+        mock_result.document.export_to_dict.return_value = {}
         mock_conv.convert.return_value = mock_result
         mock_build.return_value = mock_conv
 
@@ -193,6 +200,7 @@ class TestConvertDocumentRouting:
         mock_result.document.iterate_items.return_value = []
         mock_result.document.export_to_markdown.return_value = ""
         mock_result.document.export_to_html.return_value = ""
+        mock_result.document.export_to_dict.return_value = {}
         mock_conv.convert.return_value = mock_result
         mock_build.return_value = mock_conv
 
@@ -210,6 +218,7 @@ class TestConvertDocumentRouting:
         mock_result.document.iterate_items.return_value = []
         mock_result.document.export_to_markdown.return_value = ""
         mock_result.document.export_to_html.return_value = ""
+        mock_result.document.export_to_dict.return_value = {}
         mock_conv.convert.return_value = mock_result
         mock_build.return_value = mock_conv
 
@@ -226,6 +235,7 @@ class TestConvertDocumentRouting:
         mock_result.document.iterate_items.return_value = []
         mock_result.document.export_to_markdown.return_value = ""
         mock_result.document.export_to_html.return_value = ""
+        mock_result.document.export_to_dict.return_value = {}
         mock_conv.convert.return_value = mock_result
         mock_build.return_value = mock_conv
 
@@ -242,6 +252,7 @@ class TestConvertDocumentRouting:
         mock_result.document.iterate_items.return_value = []
         mock_result.document.export_to_markdown.return_value = ""
         mock_result.document.export_to_html.return_value = ""
+        mock_result.document.export_to_dict.return_value = {}
         mock_conv.convert.return_value = mock_result
         mock_build.return_value = mock_conv
 
@@ -258,6 +269,7 @@ class TestConvertDocumentRouting:
         mock_result.document.iterate_items.return_value = []
         mock_result.document.export_to_markdown.return_value = ""
         mock_result.document.export_to_html.return_value = ""
+        mock_result.document.export_to_dict.return_value = {}
         mock_conv.convert.return_value = mock_result
         mock_build.return_value = mock_conv
 
@@ -275,6 +287,7 @@ class TestConvertDocumentRouting:
         mock_result.document.iterate_items.return_value = []
         mock_result.document.export_to_markdown.return_value = ""
         mock_result.document.export_to_html.return_value = ""
+        mock_result.document.export_to_dict.return_value = {}
         mock_conv.convert.return_value = mock_result
         mock_build.return_value = mock_conv
 
@@ -299,30 +312,37 @@ class TestConvertDocumentRouting:
 # Service layer — pipeline options forwarding
 # ---------------------------------------------------------------------------
 
+
 class TestServiceForwardsPipelineOptions:
     """Verify analysis_service.create and _run_analysis forward pipeline options."""
 
     @pytest.fixture
     def mock_doc(self):
         from domain.models import Document
+
         return Document(id="d1", filename="test.pdf", storage_path="/tmp/test.pdf")
 
     @pytest.fixture
     def mock_job(self):
         from domain.models import AnalysisJob
+
         return AnalysisJob(id="j1", document_id="d1", document_filename="test.pdf")
 
     @patch("services.analysis_service.document_repo")
     @patch("services.analysis_service.analysis_repo")
     @pytest.mark.asyncio
     async def test_create_passes_pipeline_options_to_run(
-        self, mock_analysis_repo, mock_doc_repo, mock_doc,
+        self,
+        mock_analysis_repo,
+        mock_doc_repo,
+        mock_doc,
     ):
         mock_doc_repo.find_by_id = AsyncMock(return_value=mock_doc)
         mock_analysis_repo.insert = AsyncMock()
 
         mock_converter = AsyncMock()
         from services.analysis_service import AnalysisService
+
         svc = AnalysisService(converter=mock_converter)
 
         opts = {"do_ocr": False, "table_mode": "fast"}
@@ -335,13 +355,17 @@ class TestServiceForwardsPipelineOptions:
     @patch("services.analysis_service.analysis_repo")
     @pytest.mark.asyncio
     async def test_create_passes_none_when_no_options(
-        self, mock_analysis_repo, mock_doc_repo, mock_doc,
+        self,
+        mock_analysis_repo,
+        mock_doc_repo,
+        mock_doc,
     ):
         mock_doc_repo.find_by_id = AsyncMock(return_value=mock_doc)
         mock_analysis_repo.insert = AsyncMock()
 
         mock_converter = AsyncMock()
         from services.analysis_service import AnalysisService
+
         svc = AnalysisService(converter=mock_converter)
 
         with patch("services.analysis_service.asyncio.create_task") as mock_task:
@@ -352,7 +376,10 @@ class TestServiceForwardsPipelineOptions:
     @patch("services.analysis_service.document_repo")
     @pytest.mark.asyncio
     async def test_run_analysis_forwards_options_to_convert(
-        self, mock_doc_repo, mock_analysis_repo, mock_job,
+        self,
+        mock_doc_repo,
+        mock_analysis_repo,
+        mock_job,
     ):
         from domain.value_objects import ConversionResult, PageDetail
 
@@ -369,6 +396,7 @@ class TestServiceForwardsPipelineOptions:
         )
 
         from services.analysis_service import AnalysisService
+
         svc = AnalysisService(converter=mock_converter)
 
         opts = {
@@ -399,7 +427,10 @@ class TestServiceForwardsPipelineOptions:
     @patch("services.analysis_service.document_repo")
     @pytest.mark.asyncio
     async def test_run_analysis_uses_defaults_when_no_options(
-        self, mock_doc_repo, mock_analysis_repo, mock_job,
+        self,
+        mock_doc_repo,
+        mock_analysis_repo,
+        mock_job,
     ):
         from domain.value_objects import ConversionResult, PageDetail
 
@@ -416,6 +447,7 @@ class TestServiceForwardsPipelineOptions:
         )
 
         from services.analysis_service import AnalysisService
+
         svc = AnalysisService(converter=mock_converter)
 
         await svc._run_analysis("j1", "/tmp/test.pdf", "test.pdf", None)
@@ -429,7 +461,10 @@ class TestServiceForwardsPipelineOptions:
     @patch("services.analysis_service.document_repo")
     @pytest.mark.asyncio
     async def test_run_analysis_marks_failed_on_error(
-        self, mock_doc_repo, mock_analysis_repo, mock_job,
+        self,
+        mock_doc_repo,
+        mock_analysis_repo,
+        mock_job,
     ):
         mock_analysis_repo.find_by_id = AsyncMock(return_value=mock_job)
         mock_analysis_repo.update_status = AsyncMock()
@@ -438,6 +473,7 @@ class TestServiceForwardsPipelineOptions:
         mock_converter.convert.side_effect = RuntimeError("Docling crashed")
 
         from services.analysis_service import AnalysisService
+
         svc = AnalysisService(converter=mock_converter)
 
         await svc._run_analysis("j1", "/tmp/test.pdf", "test.pdf", {"do_ocr": False})
@@ -453,6 +489,7 @@ class TestServiceForwardsPipelineOptions:
 # API endpoint — full request/response with pipeline options
 # ---------------------------------------------------------------------------
 
+
 class TestAnalysisEndpointPipelineOptions:
     """Integration-level tests for the analysis creation endpoint with pipeline options."""
 
@@ -461,6 +498,7 @@ class TestAnalysisEndpointPipelineOptions:
         from fastapi.testclient import TestClient
 
         from main import app
+
         return TestClient(app, raise_server_exceptions=False)
 
     @pytest.fixture
@@ -468,6 +506,7 @@ class TestAnalysisEndpointPipelineOptions:
         from unittest.mock import MagicMock
 
         from main import app
+
         mock = MagicMock()
         original = getattr(app.state, "analysis_service", None)
         app.state.analysis_service = mock
@@ -476,20 +515,25 @@ class TestAnalysisEndpointPipelineOptions:
 
     def test_no_pipeline_options_sends_none(self, client, mock_svc):
         from domain.models import AnalysisJob
+
         mock_svc.create = AsyncMock(return_value=AnalysisJob(id="j1", document_id="d1"))
 
         client.post("/api/analyses", json={"documentId": "d1"})
 
-        mock_svc.create.assert_called_once_with("d1", pipeline_options=None)
+        mock_svc.create.assert_called_once_with("d1", pipeline_options=None, chunking_options=None)
 
     def test_empty_pipeline_options_object_uses_defaults(self, client, mock_svc):
         from domain.models import AnalysisJob
+
         mock_svc.create = AsyncMock(return_value=AnalysisJob(id="j1", document_id="d1"))
 
-        client.post("/api/analyses", json={
-            "documentId": "d1",
-            "pipelineOptions": {},
-        })
+        client.post(
+            "/api/analyses",
+            json={
+                "documentId": "d1",
+                "pipelineOptions": {},
+            },
+        )
 
         opts = mock_svc.create.call_args.kwargs["pipeline_options"]
         assert opts["do_ocr"] is True
@@ -501,12 +545,16 @@ class TestAnalysisEndpointPipelineOptions:
 
     def test_partial_pipeline_options_merges_with_defaults(self, client, mock_svc):
         from domain.models import AnalysisJob
+
         mock_svc.create = AsyncMock(return_value=AnalysisJob(id="j1", document_id="d1"))
 
-        client.post("/api/analyses", json={
-            "documentId": "d1",
-            "pipelineOptions": {"do_ocr": False, "images_scale": 1.5},
-        })
+        client.post(
+            "/api/analyses",
+            json={
+                "documentId": "d1",
+                "pipelineOptions": {"do_ocr": False, "images_scale": 1.5},
+            },
+        )
 
         opts = mock_svc.create.call_args.kwargs["pipeline_options"]
         assert opts["do_ocr"] is False
@@ -522,6 +570,7 @@ class TestAnalysisEndpointPipelineOptions:
 
     def test_full_pipeline_options(self, client, mock_svc):
         from domain.models import AnalysisJob
+
         mock_svc.create = AsyncMock(return_value=AnalysisJob(id="j1", document_id="d1"))
 
         payload = {
@@ -547,18 +596,25 @@ class TestAnalysisEndpointPipelineOptions:
         assert opts == payload["pipelineOptions"]
 
     def test_invalid_pipeline_option_type_rejected(self, client, mock_svc):
-        resp = client.post("/api/analyses", json={
-            "documentId": "d1",
-            "pipelineOptions": {"do_ocr": "not-a-bool"},
-        })
+        resp = client.post(
+            "/api/analyses",
+            json={
+                "documentId": "d1",
+                "pipelineOptions": {"do_ocr": "not-a-bool"},
+            },
+        )
         assert resp.status_code == 422
 
     def test_unknown_pipeline_option_ignored(self, client, mock_svc):
         from domain.models import AnalysisJob
+
         mock_svc.create = AsyncMock(return_value=AnalysisJob(id="j1", document_id="d1"))
 
-        resp = client.post("/api/analyses", json={
-            "documentId": "d1",
-            "pipelineOptions": {"do_ocr": True, "unknown_field": True},
-        })
+        resp = client.post(
+            "/api/analyses",
+            json={
+                "documentId": "d1",
+                "pipelineOptions": {"do_ocr": True, "unknown_field": True},
+            },
+        )
         assert resp.status_code == 200

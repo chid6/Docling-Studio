@@ -71,7 +71,9 @@ class ServeConverter:
         return headers
 
     async def convert(
-        self, file_path: str, options: ConversionOptions,
+        self,
+        file_path: str,
+        options: ConversionOptions,
     ) -> ConversionResult:
         """Convert a document by uploading it to Docling Serve."""
         path = Path(file_path)
@@ -202,7 +204,9 @@ def _add_element(item: dict, pages: dict[int, PageDetail]) -> None:
         page_no = prov.get("page_no", 1)
         if page_no not in pages:
             pages[page_no] = PageDetail(
-                page_number=page_no, width=612.0, height=792.0,
+                page_number=page_no,
+                width=612.0,
+                height=792.0,
             )
 
         bbox_data = prov.get("bbox", {})

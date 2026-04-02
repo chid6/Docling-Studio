@@ -14,7 +14,9 @@ class Settings:
     conversion_timeout: int = 600
     upload_dir: str = "./uploads"
     db_path: str = "./data/docling_studio.db"
-    cors_origins: list[str] = field(default_factory=lambda: ["http://localhost:3000", "http://localhost:5173"])
+    cors_origins: list[str] = field(
+        default_factory=lambda: ["http://localhost:3000", "http://localhost:5173"]
+    )
 
     @classmethod
     def from_env(cls) -> Settings:
