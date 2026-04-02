@@ -89,19 +89,25 @@ onMounted(() => {
 .doc-items {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 6px;
+  padding: 12px;
 }
 
 .doc-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 14px 20px;
-  border-bottom: 1px solid var(--border);
-  transition: background var(--transition);
+  padding: 12px 16px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  transition: all 150ms ease;
 }
 
-.doc-row:hover { background: var(--bg-hover); }
+.doc-row:hover {
+  border-color: var(--accent);
+  background: var(--bg-elevated);
+}
 
 .doc-row-info {
   display: flex;
