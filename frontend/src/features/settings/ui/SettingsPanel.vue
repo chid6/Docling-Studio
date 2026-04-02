@@ -22,7 +22,7 @@
 
     <div class="setting-group">
       <label class="setting-label">{{ t('settings.version') }}</label>
-      <span class="setting-value">0.1.0</span>
+      <span class="setting-value">{{ version }}</span>
     </div>
   </div>
 </template>
@@ -31,6 +31,7 @@
 import { useSettingsStore } from '../store'
 import { useI18n } from '../../../shared/i18n'
 
+const version = __APP_VERSION__
 const store = useSettingsStore()
 const { t } = useI18n()
 </script>

@@ -167,14 +167,11 @@ GitHub Actions pipelines (see [`.github/workflows/`](.github/workflows/)):
 
 | Workflow | Trigger | What it does |
 |----------|---------|--------------|
-| **CI** | push to `main`, pull requests | Lint + type check + Backend tests (99) + Frontend tests (81) + build |
+| **CI** | push to `main`, pull requests | Lint + type check + Backend tests + Frontend tests + build |
 | **Release** | push tag `v*` | Build & push multi-arch Docker image to `ghcr.io` |
+| **Docs** | push to `main` (docs changes) | Build & deploy MkDocs to GitHub Pages |
 
-To publish a new version:
-```bash
-git tag v0.2.0
-git push origin v0.2.0
-```
+We follow [Semantic Versioning](https://semver.org/) with a simplified Git Flow. See [CONTRIBUTING.md](CONTRIBUTING.md) for the full release process.
 
 ## Performance & System Requirements
 

@@ -106,4 +106,8 @@ app.include_router(analyses_router)
 @app.get("/health")
 def health():
     """Health check endpoint."""
-    return {"status": "ok", "engine": settings.conversion_engine}
+    return {
+        "status": "ok",
+        "version": settings.app_version,
+        "engine": settings.conversion_engine,
+    }

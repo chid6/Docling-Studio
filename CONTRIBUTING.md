@@ -80,6 +80,74 @@ All tests must pass before submitting a PR.
 4. Describe **what** changed and **why** in the PR description
 5. Ensure CI passes (tests + build)
 
+## Branching Strategy
+
+We follow a simplified Git Flow:
+
+| Branch | Purpose |
+|--------|---------|
+| `main` | Always stable — latest release merged back |
+| `release/X.Y.Z` | Release preparation (freeze, bugfixes, changelog) |
+| `feature/*` | New features — PR to `main` |
+| `fix/*` | Bug fixes — PR to `main` (or `release/*` for pre-release fixes) |
+| `hotfix/X.Y.Z` | Urgent fix on a released version — PR to `main` |
+
+Rules:
+- All PRs target `main` (never stack branches on other feature branches)
+- `release/*` branches are created from `main` when preparing a release
+- `hotfix/*` branches are created from the release tag
+
+## Versioning
+
+We use [Semantic Versioning](https://semver.org/): `MAJOR.MINOR.PATCH`.
+
+- **Source of truth**: the git tag (`vX.Y.Z`)
+- `package.json` version should match the current release branch
+- The build injects the version automatically (Vite `__APP_VERSION__` for frontend, `APP_VERSION` env var for backend)
+
+## Release Process
+
+1. **Create the release branch** from `main`:
+   ```bash
+   git checkout main && git pull
+   git checkout -b release/X.Y.Z
+   ```
+
+2. **On the release branch**, only:
+   - Bug fixes
+   - Move `[Unreleased]` to `[X.Y.Z] - YYYY-MM-DD` in `CHANGELOG.md`
+   - Update `version` in `frontend/package.json`
+
+3. **Merge into `main`** via PR, then **tag on `main`**:
+   ```bash
+   git checkout main && git pull
+   git tag vX.Y.Z
+   git push origin vX.Y.Z
+   ```
+
+4. The tag triggers the **release workflow** which builds and pushes the Docker image to `ghcr.io`.
+
+### Docker Image Tags
+
+| Tag | Description |
+|-----|-------------|
+| `X.Y.Z` | Exact version |
+| `X.Y` | Latest patch of this minor |
+| `latest` | Latest stable release |
+
+### Hotfix
+
+```bash
+git checkout vX.Y.Z           # from the release tag
+git checkout -b hotfix/X.Y.Z+1
+# fix, commit, PR to main
+git tag vX.Y.Z+1              # tag on main after merge
+```
+
+### Changelog
+
+We follow [Keep a Changelog](https://keepachangelog.com/). Every PR should add a line under `[Unreleased]` in `CHANGELOG.md`. The release branch moves `[Unreleased]` to the versioned section.
+
 ## Pull Request Guidelines
 
 - Keep PRs focused — one feature or fix per PR

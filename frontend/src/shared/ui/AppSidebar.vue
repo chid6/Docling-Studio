@@ -28,7 +28,7 @@
     </nav>
 
     <div class="sidebar-footer">
-      <span class="version">v0.1.0</span>
+      <span class="version">v{{ version }}</span>
     </div>
   </aside>
 </template>
@@ -37,6 +37,7 @@
 import { RouterLink, useRoute } from 'vue-router'
 import { useI18n } from '../i18n'
 
+const version = __APP_VERSION__
 const route = useRoute()
 const { t } = useI18n()
 

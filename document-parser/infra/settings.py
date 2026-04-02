@@ -8,6 +8,7 @@ from dataclasses import dataclass, field
 
 @dataclass(frozen=True)
 class Settings:
+    app_version: str = "dev"
     conversion_engine: str = "local"  # "local" or "remote"
     docling_serve_url: str = "http://localhost:5001"
     docling_serve_api_key: str | None = None
@@ -22,6 +23,7 @@ class Settings:
     def from_env(cls) -> Settings:
         cors_raw = os.environ.get("CORS_ORIGINS", "http://localhost:3000,http://localhost:5173")
         return cls(
+            app_version=os.environ.get("APP_VERSION", "dev"),
             conversion_engine=os.environ.get("CONVERSION_ENGINE", "local"),
             docling_serve_url=os.environ.get("DOCLING_SERVE_URL", "http://localhost:5001"),
             docling_serve_api_key=os.environ.get("DOCLING_SERVE_API_KEY"),
