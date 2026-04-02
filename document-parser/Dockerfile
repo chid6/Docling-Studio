@@ -1,9 +1,17 @@
-FROM python:3.12-slim
+# syntax=docker/dockerfile:1
+# =============================================================================
+# Docling Studio — backend image (multi-target: remote / local)
+#
+# Usage:
+#   docker build --target remote -t docling-studio-backend:remote .
+#   docker build --target local  -t docling-studio-backend:local  .
+# =============================================================================
+
+# --- Base: common deps for both targets ---
+FROM python:3.12-slim AS base
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     poppler-utils \
-    libgl1 \
-    libglib2.0-0 \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
@@ -24,3 +32,23 @@ ENV DB_PATH=/app/data/docling_studio.db
 
 USER appuser
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+
+# --- Remote: lightweight, delegates to Docling Serve ---
+FROM base AS remote
+ENV CONVERSION_ENGINE=remote
+
+# --- Local: full Docling in-process ---
+FROM base AS local
+
+USER root
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libgl1 \
+    libglib2.0-0 \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY requirements-local.txt .
+RUN pip install --no-cache-dir -r requirements-local.txt
+
+RUN chown -R appuser:appuser /app
+USER appuser
+ENV CONVERSION_ENGINE=local
