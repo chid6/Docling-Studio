@@ -551,12 +551,17 @@ onBeforeUnmount(() => {
   display: flex;
   align-items: center;
   gap: 20px;
+  min-width: 0;
 }
 
 .topbar-title {
   font-size: 15px;
   font-weight: 600;
   color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
 }
 
 .mode-toggle {
