@@ -1,10 +1,24 @@
 <template>
   <div class="chunk-panel">
-    <!-- Chunking config -->
+    <!-- Chunking config — collapsible -->
     <div class="chunk-config">
-      <div class="config-section">
-        <label class="config-label">{{ t('chunking.settings') }}</label>
+      <button class="config-toggle" @click="configOpen = !configOpen">
+        <svg
+          class="config-chevron"
+          :class="{ open: configOpen }"
+          viewBox="0 0 20 20"
+          fill="currentColor"
+        >
+          <path
+            fill-rule="evenodd"
+            d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+            clip-rule="evenodd"
+          />
+        </svg>
+        <span class="config-label">{{ t('chunking.settings') }}</span>
+      </button>
 
+      <div v-if="configOpen" class="config-body">
         <div class="config-row">
           <label class="config-label-sm">{{ t('chunking.chunkerType') }}</label>
           <select class="config-select" v-model="options.chunker_type">
@@ -40,31 +54,34 @@
             <span class="toggle-text">{{ t('chunking.repeatTableHeader') }}</span>
           </label>
         </div>
-      </div>
 
-      <button
-        class="chunk-btn primary"
-        :disabled="!canRechunk || analysisStore.rechunking"
-        @click="doRechunk"
-      >
-        <div v-if="analysisStore.rechunking" class="spinner-sm" />
-        {{ analysisStore.rechunking ? t('chunking.chunking') : t('chunking.run') }}
-      </button>
+        <button
+          class="chunk-btn primary"
+          :disabled="!canRechunk || analysisStore.rechunking"
+          @click="doRechunk"
+        >
+          <div v-if="analysisStore.rechunking" class="spinner-sm" />
+          {{ analysisStore.rechunking ? t('chunking.chunking') : t('chunking.run') }}
+        </button>
+      </div>
     </div>
 
     <!-- Chunks list -->
-    <div class="chunk-results" v-if="analysisStore.currentChunks.length">
+    <div class="chunk-results" v-if="pageChunks.length">
       <div class="chunk-summary">
-        {{ analysisStore.currentChunks.length }} {{ t('chunking.chunks') }}
+        {{ pagination.totalItems.value }} {{ t('chunking.chunks') }}
       </div>
       <div class="chunk-list">
         <div
           class="chunk-card"
-          v-for="(chunk, idx) in analysisStore.currentChunks"
-          :key="idx"
+          v-for="(chunk, localIdx) in pagination.paginatedItems.value"
+          :key="globalIndex(localIdx)"
+          :class="{ highlighted: hoveredChunkIdx === globalIndex(localIdx) }"
+          @mouseenter="onChunkHover(chunk, localIdx)"
+          @mouseleave="onChunkLeave"
         >
           <div class="chunk-header">
-            <span class="chunk-index">#{{ idx + 1 }}</span>
+            <span class="chunk-index">#{{ globalIndex(localIdx) + 1 }}</span>
             <span class="chunk-tokens" v-if="chunk.tokenCount">
               {{ chunk.tokenCount }} tokens
             </span>
@@ -81,19 +98,46 @@
     </div>
 
     <div class="chunk-empty" v-else-if="!analysisStore.rechunking">
-      <p>{{ t('chunking.noChunks') }}</p>
+      <p>
+        {{
+          analysisStore.currentChunks.length
+            ? t('chunking.noChunksOnPage')
+            : t('chunking.noChunks')
+        }}
+      </p>
     </div>
+
+    <!-- Pagination -->
+    <PaginationBar
+      :page="pagination.page.value"
+      :page-count="pagination.pageCount.value"
+      :page-size="pagination.pageSize.value"
+      @update:page="pagination.goTo($event)"
+      @update:page-size="pagination.setPageSize($event)"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
-import { reactive, computed } from 'vue'
+import { ref, reactive, computed } from 'vue'
 import { useAnalysisStore } from '../../analysis/store'
 import { useI18n } from '../../../shared/i18n'
-import type { ChunkingOptions } from '../../../shared/types'
+import { usePagination } from '../../../shared/composables/usePagination'
+import { PaginationBar } from '../../../shared/ui'
+import type { Chunk, ChunkBbox, ChunkingOptions } from '../../../shared/types'
+
+const props = defineProps<{
+  currentPage: number
+}>()
+
+const emit = defineEmits<{
+  'highlight-bboxes': [bboxes: ChunkBbox[]]
+}>()
 
 const analysisStore = useAnalysisStore()
 const { t } = useI18n()
+
+const configOpen = ref(true)
 
 const options = reactive<Required<ChunkingOptions>>({
   chunker_type: 'hybrid',
@@ -106,6 +150,28 @@ const canRechunk = computed(() => {
   const analysis = analysisStore.currentAnalysis
   return analysis?.status === 'COMPLETED' && analysis.hasDocumentJson
 })
+
+const pageChunks = computed(() =>
+  analysisStore.currentChunks.filter((c) => c.sourcePage === props.currentPage),
+)
+const pagination = usePagination(pageChunks, { pageSize: 20 })
+
+function globalIndex(localIdx: number): number {
+  return (pagination.page.value - 1) * pagination.pageSize.value + localIdx
+}
+
+const hoveredChunkIdx = ref(-1)
+
+function onChunkHover(chunk: Chunk, localIdx: number) {
+  hoveredChunkIdx.value = globalIndex(localIdx)
+  const pageBboxes = chunk.bboxes.filter((b) => b.page === props.currentPage)
+  emit('highlight-bboxes', pageBboxes)
+}
+
+function onChunkLeave() {
+  hoveredChunkIdx.value = -1
+  emit('highlight-bboxes', [])
+}
 
 async function doRechunk() {
   if (!analysisStore.currentAnalysis) return
@@ -122,17 +188,35 @@ async function doRechunk() {
 }
 
 .chunk-config {
-  padding: 16px;
   border-bottom: 1px solid var(--border);
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+  flex-shrink: 0;
 }
 
-.config-section {
+.config-toggle {
   display: flex;
-  flex-direction: column;
-  gap: 8px;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  padding: 10px 16px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-secondary);
+}
+
+.config-toggle:hover {
+  color: var(--text);
+}
+
+.config-chevron {
+  width: 14px;
+  height: 14px;
+  transition: transform 0.2s;
+  transform: rotate(0deg);
+}
+
+.config-chevron.open {
+  transform: rotate(90deg);
 }
 
 .config-label {
@@ -140,7 +224,13 @@ async function doRechunk() {
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  color: var(--text-secondary);
+}
+
+.config-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 0 16px 16px;
 }
 
 .config-label-sm {
@@ -225,6 +315,7 @@ async function doRechunk() {
   align-items: center;
   justify-content: center;
   gap: 6px;
+  margin-top: 4px;
 }
 
 .chunk-btn.primary {
@@ -241,6 +332,7 @@ async function doRechunk() {
   flex: 1;
   overflow-y: auto;
   padding: 12px;
+  min-height: 0;
 }
 
 .chunk-summary {
@@ -263,6 +355,17 @@ async function doRechunk() {
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 10px 12px;
+  cursor: default;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.chunk-card:hover {
+  border-color: #F59E0B;
+}
+
+.chunk-card.highlighted {
+  border-color: #F59E0B;
+  background: rgba(245, 158, 11, 0.08);
 }
 
 .chunk-header {
@@ -331,6 +434,8 @@ async function doRechunk() {
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 </style>

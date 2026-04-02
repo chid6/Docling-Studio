@@ -106,6 +106,11 @@ const messages: Messages = {
     'chunking.chunking': 'Chunking...',
     'chunking.chunks': 'chunks',
     'chunking.noChunks': 'Lancez le chunking pour préparer les segments.',
+    'chunking.noChunksOnPage': 'Aucun chunk sur cette page.',
+
+    // Pagination
+    'pagination.pageOf': 'Page {current} sur {total}',
+    'pagination.perPage': '/ page',
 
     // Settings
     'settings.title': 'Paramètres',
@@ -207,6 +212,10 @@ const messages: Messages = {
     'chunking.chunking': 'Chunking...',
     'chunking.chunks': 'chunks',
     'chunking.noChunks': 'Run chunking to prepare segments.',
+    'chunking.noChunksOnPage': 'No chunks on this page.',
+
+    'pagination.pageOf': 'Page {current} of {total}',
+    'pagination.perPage': '/ page',
 
     'settings.title': 'Settings',
     'settings.apiUrl': 'API URL',
