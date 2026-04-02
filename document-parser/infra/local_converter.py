@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import asyncio
 import contextlib
+import json
 import logging
 import threading
 
@@ -83,6 +84,7 @@ def _get_element_type(item: DocItem) -> str:
 # Pipeline factory
 # ---------------------------------------------------------------------------
 
+
 def _build_docling_converter(options: ConversionOptions) -> DoclingConverter:
     table_options = TableStructureOptions(
         do_cell_matching=True,
@@ -126,6 +128,7 @@ def _select_converter(options: ConversionOptions) -> DoclingConverter:
 # Page extraction
 # ---------------------------------------------------------------------------
 
+
 def _extract_pages_detail(doc_result) -> tuple[list[PageDetail], int]:
     pages: dict[int, PageDetail] = {}
     document = doc_result.document
@@ -149,7 +152,9 @@ def _extract_pages_detail(doc_result) -> tuple[list[PageDetail], int]:
 
 
 def _process_content_item(
-    item: DocItem | GroupItem, level: int, pages: dict[int, PageDetail],
+    item: DocItem | GroupItem,
+    level: int,
+    pages: dict[int, PageDetail],
 ) -> bool:
     if isinstance(item, GroupItem):
         return True
@@ -163,9 +168,13 @@ def _process_content_item(
             if page_no not in pages:
                 logger.warning(
                     "Page %d not found in document metadata — using US Letter fallback (%sx%s pt)",
-                    page_no, _DEFAULT_PAGE_WIDTH, _DEFAULT_PAGE_HEIGHT,
+                    page_no,
+                    _DEFAULT_PAGE_WIDTH,
+                    _DEFAULT_PAGE_HEIGHT,
                 )
-                pages[page_no] = PageDetail(page_number=page_no, width=_DEFAULT_PAGE_WIDTH, height=_DEFAULT_PAGE_HEIGHT)
+                pages[page_no] = PageDetail(
+                    page_number=page_no, width=_DEFAULT_PAGE_WIDTH, height=_DEFAULT_PAGE_HEIGHT
+                )
 
             page_height = pages[page_no].height
 
@@ -199,6 +208,7 @@ def _process_content_item(
 # Synchronous conversion (called via asyncio.to_thread)
 # ---------------------------------------------------------------------------
 
+
 def _convert_sync(file_path: str, options: ConversionOptions) -> ConversionResult:
     with _converter_lock:
         conv = _select_converter(options)
@@ -213,7 +223,9 @@ def _convert_sync(file_path: str, options: ConversionOptions) -> ConversionResul
             PageDetail(
                 page_number=i + 1,
                 width=doc.pages[i + 1].size.width if (i + 1) in doc.pages else _DEFAULT_PAGE_WIDTH,
-                height=doc.pages[i + 1].size.height if (i + 1) in doc.pages else _DEFAULT_PAGE_HEIGHT,
+                height=doc.pages[i + 1].size.height
+                if (i + 1) in doc.pages
+                else _DEFAULT_PAGE_HEIGHT,
             )
             for i in range(page_count)
         ]
@@ -227,6 +239,7 @@ def _convert_sync(file_path: str, options: ConversionOptions) -> ConversionResul
         content_html=doc.export_to_html(),
         pages=pages_detail,
         skipped_items=skipped,
+        document_json=json.dumps(doc.export_to_dict()),
     )
 
 
@@ -234,10 +247,13 @@ def _convert_sync(file_path: str, options: ConversionOptions) -> ConversionResul
 # Public adapter class
 # ---------------------------------------------------------------------------
 
+
 class LocalConverter:
     """Adapter that runs Docling locally as a Python library."""
 
     async def convert(
-        self, file_path: str, options: ConversionOptions,
+        self,
+        file_path: str,
+        options: ConversionOptions,
     ) -> ConversionResult:
         return await asyncio.to_thread(_convert_sync, file_path, options)
