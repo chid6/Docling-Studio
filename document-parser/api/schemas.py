@@ -18,6 +18,7 @@ def _to_camel(name: str) -> str:
 
 class _CamelModel(BaseModel):
     """Base model that serializes field names to camelCase."""
+
     model_config = ConfigDict(
         alias_generator=_to_camel,
         populate_by_name=True,
@@ -42,6 +43,8 @@ class AnalysisResponse(_CamelModel):
     content_markdown: str | None = None
     content_html: str | None = None
     pages_json: str | None = None
+    chunks_json: str | None = None
+    has_document_json: bool = False
     error_message: str | None = None
     started_at: str | datetime | None = None
     completed_at: str | datetime | None = None
@@ -50,6 +53,7 @@ class AnalysisResponse(_CamelModel):
 
 class PipelineOptionsRequest(BaseModel):
     """Docling pipeline configuration options."""
+
     do_ocr: bool = True
     do_table_structure: bool = True
     table_mode: str = "accurate"  # "accurate" or "fast"
@@ -76,6 +80,41 @@ class PipelineOptionsRequest(BaseModel):
         return v
 
 
+class ChunkingOptionsRequest(BaseModel):
+    """Docling chunking configuration options."""
+
+    chunker_type: str = "hybrid"  # "hybrid", "hierarchical"
+    max_tokens: int = 512
+    merge_peers: bool = True
+    repeat_table_header: bool = True
+
+    @field_validator("chunker_type")
+    @classmethod
+    def validate_chunker_type(cls, v: str) -> str:
+        if v not in ("hybrid", "hierarchical"):
+            raise ValueError('chunker_type must be "hybrid" or "hierarchical"')
+        return v
+
+    @field_validator("max_tokens")
+    @classmethod
+    def validate_max_tokens(cls, v: int) -> int:
+        if v < 64 or v > 8192:
+            raise ValueError("max_tokens must be between 64 and 8192")
+        return v
+
+
+class ChunkResponse(_CamelModel):
+    text: str
+    headings: list[str] = []
+    source_page: int | None = None
+    token_count: int = 0
+
+
 class CreateAnalysisRequest(BaseModel):
     documentId: str  # camelCase to match existing frontend contract
     pipelineOptions: PipelineOptionsRequest | None = None
+    chunkingOptions: ChunkingOptionsRequest | None = None
+
+
+class RechunkRequest(BaseModel):
+    chunkingOptions: ChunkingOptionsRequest

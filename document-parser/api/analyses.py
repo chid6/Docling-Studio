@@ -7,7 +7,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Request
 
-from api.schemas import AnalysisResponse, CreateAnalysisRequest
+from api.schemas import AnalysisResponse, ChunkResponse, CreateAnalysisRequest, RechunkRequest
 from services.analysis_service import AnalysisService
 
 logger = logging.getLogger(__name__)
@@ -30,6 +30,8 @@ def _to_response(job) -> AnalysisResponse:
         content_markdown=job.content_markdown,
         content_html=job.content_html,
         pages_json=job.pages_json,
+        chunks_json=job.chunks_json,
+        has_document_json=job.document_json is not None,
         error_message=job.error_message,
         started_at=str(job.started_at) if job.started_at else None,
         completed_at=str(job.completed_at) if job.completed_at else None,
@@ -47,8 +49,16 @@ async def create_analysis(body: CreateAnalysisRequest, service: ServiceDep):
     if body.pipelineOptions:
         pipeline_opts = body.pipelineOptions.model_dump()
 
+    chunking_opts = None
+    if body.chunkingOptions:
+        chunking_opts = body.chunkingOptions.model_dump()
+
     try:
-        job = await service.create(body.documentId, pipeline_options=pipeline_opts)
+        job = await service.create(
+            body.documentId,
+            pipeline_options=pipeline_opts,
+            chunking_options=chunking_opts,
+        )
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e)) from e
 
@@ -69,6 +79,24 @@ async def get_analysis(job_id: str, service: ServiceDep):
     if not job:
         raise HTTPException(status_code=404, detail="Analysis not found")
     return _to_response(job)
+
+
+@router.post("/{job_id}/rechunk", response_model=list[ChunkResponse])
+async def rechunk_analysis(job_id: str, body: RechunkRequest, service: ServiceDep):
+    """Re-chunk a completed analysis with new chunking options."""
+    try:
+        chunks = await service.rechunk(job_id, body.chunkingOptions.model_dump())
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+    return [
+        ChunkResponse(
+            text=c.text,
+            headings=c.headings,
+            source_page=c.source_page,
+            token_count=c.token_count,
+        )
+        for c in chunks
+    ]
 
 
 @router.delete("/{job_id}", status_code=204)

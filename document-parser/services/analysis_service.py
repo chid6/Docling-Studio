@@ -13,24 +13,46 @@ import logging
 from dataclasses import asdict
 from typing import TYPE_CHECKING
 
-from domain.models import AnalysisJob
-from domain.value_objects import ConversionOptions, ConversionResult
+from domain.models import AnalysisJob, AnalysisStatus
+from domain.value_objects import ChunkingOptions, ChunkResult, ConversionOptions, ConversionResult
 
 if TYPE_CHECKING:
-    from domain.ports import DocumentConverter
+    from domain.ports import DocumentChunker, DocumentConverter
 from persistence import analysis_repo, document_repo
 
 logger = logging.getLogger(__name__)
 
 
+def _chunk_to_dict(c: ChunkResult) -> dict:
+    """Serialize ChunkResult to a camelCase dict matching the frontend API contract."""
+    return {
+        "text": c.text,
+        "headings": c.headings,
+        "sourcePage": c.source_page,
+        "tokenCount": c.token_count,
+    }
+
+
 class AnalysisService:
     """Orchestrates document analysis using an injected converter."""
 
-    def __init__(self, converter: DocumentConverter, conversion_timeout: int = 600):
+    def __init__(
+        self,
+        converter: DocumentConverter,
+        chunker: DocumentChunker | None = None,
+        conversion_timeout: int = 600,
+    ):
         self._converter = converter
+        self._chunker = chunker
         self._conversion_timeout = conversion_timeout
 
-    async def create(self, document_id: str, *, pipeline_options: dict | None = None) -> AnalysisJob:
+    async def create(
+        self,
+        document_id: str,
+        *,
+        pipeline_options: dict | None = None,
+        chunking_options: dict | None = None,
+    ) -> AnalysisJob:
         """Create a new analysis job and launch background processing."""
         doc = await document_repo.find_by_id(document_id)
         if not doc:
@@ -41,7 +63,13 @@ class AnalysisService:
         await analysis_repo.insert(job)
 
         task = asyncio.create_task(
-            self._run_analysis(job.id, doc.storage_path, doc.filename, pipeline_options)
+            self._run_analysis(
+                job.id,
+                doc.storage_path,
+                doc.filename,
+                pipeline_options,
+                chunking_options,
+            )
         )
         task.add_done_callback(functools.partial(_on_task_done, job_id=job.id))
 
@@ -56,10 +84,35 @@ class AnalysisService:
     async def delete(self, job_id: str) -> bool:
         return await analysis_repo.delete(job_id)
 
+    async def rechunk(self, job_id: str, chunking_options: dict) -> list[ChunkResult]:
+        """Re-chunk an existing completed analysis with new options."""
+        job = await analysis_repo.find_by_id(job_id)
+        if not job:
+            raise ValueError(f"Analysis not found: {job_id}")
+        if job.status != AnalysisStatus.COMPLETED:
+            raise ValueError(f"Analysis is not completed: {job_id}")
+        if not job.document_json:
+            raise ValueError(f"No document data available for re-chunking: {job_id}")
+        if not self._chunker:
+            raise ValueError("Chunking is not available")
+
+        options = ChunkingOptions(**chunking_options)
+        chunks = await self._chunker.chunk(job.document_json, options)
+
+        chunks_json = json.dumps([_chunk_to_dict(c) for c in chunks])
+        await analysis_repo.update_chunks(job_id, chunks_json)
+
+        return chunks
+
     async def _run_analysis(
-        self, job_id: str, file_path: str, filename: str, pipeline_options: dict | None = None,
+        self,
+        job_id: str,
+        file_path: str,
+        filename: str,
+        pipeline_options: dict | None = None,
+        chunking_options: dict | None = None,
     ) -> None:
-        """Background task: run conversion and update job status."""
+        """Background task: run conversion and optionally chunk."""
         try:
             job = await analysis_repo.find_by_id(job_id)
             if not job:
@@ -79,10 +132,19 @@ class AnalysisService:
 
             pages_json = json.dumps([asdict(p) for p in result.pages])
 
+            chunks_json = None
+            if chunking_options and self._chunker and result.document_json:
+                chunk_opts = ChunkingOptions(**chunking_options)
+                chunks = await self._chunker.chunk(result.document_json, chunk_opts)
+                chunks_json = json.dumps([_chunk_to_dict(c) for c in chunks])
+                logger.info("Chunking produced %d chunks for job %s", len(chunks), job_id)
+
             job.mark_completed(
                 markdown=result.content_markdown,
                 html=result.content_html,
                 pages_json=pages_json,
+                document_json=result.document_json,
+                chunks_json=chunks_json,
             )
             await analysis_repo.update_status(job)
 
