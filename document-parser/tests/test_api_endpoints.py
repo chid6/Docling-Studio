@@ -53,8 +53,12 @@ class TestDocumentEndpoints:
     @patch("services.document_service.find_by_id", new_callable=AsyncMock)
     def test_get_document(self, mock_find, client):
         mock_find.return_value = Document(
-            id="d1", filename="test.pdf", content_type="application/pdf",
-            file_size=2048, page_count=3, storage_path="/tmp/test",
+            id="d1",
+            filename="test.pdf",
+            content_type="application/pdf",
+            file_size=2048,
+            page_count=3,
+            storage_path="/tmp/test",
         )
 
         resp = client.get("/api/documents/d1")
@@ -74,8 +78,10 @@ class TestDocumentEndpoints:
     @patch("services.document_service.upload", new_callable=AsyncMock)
     def test_upload_document(self, mock_upload, client):
         mock_upload.return_value = Document(
-            id="new-1", filename="uploaded.pdf",
-            content_type="application/pdf", file_size=512,
+            id="new-1",
+            filename="uploaded.pdf",
+            content_type="application/pdf",
+            file_size=512,
             storage_path="/tmp/uploaded",
         )
 
@@ -115,9 +121,11 @@ class TestDocumentEndpoints:
 
 class TestAnalysisEndpoints:
     def test_list_analyses(self, client, mock_analysis_service):
-        mock_analysis_service.find_all = AsyncMock(return_value=[
-            AnalysisJob(id="j1", document_id="d1", document_filename="test.pdf"),
-        ])
+        mock_analysis_service.find_all = AsyncMock(
+            return_value=[
+                AnalysisJob(id="j1", document_id="d1", document_filename="test.pdf"),
+            ]
+        )
 
         resp = client.get("/api/analyses")
         assert resp.status_code == 200
@@ -146,37 +154,52 @@ class TestAnalysisEndpoints:
         assert resp.status_code == 404
 
     def test_create_analysis(self, client, mock_analysis_service):
-        mock_analysis_service.create = AsyncMock(return_value=AnalysisJob(
-            id="j1", document_id="d1", document_filename="test.pdf",
-        ))
+        mock_analysis_service.create = AsyncMock(
+            return_value=AnalysisJob(
+                id="j1",
+                document_id="d1",
+                document_filename="test.pdf",
+            )
+        )
 
         resp = client.post("/api/analyses", json={"documentId": "d1"})
         assert resp.status_code == 200
         data = resp.json()
         assert data["id"] == "j1"
         assert data["documentId"] == "d1"
-        mock_analysis_service.create.assert_called_once_with("d1", pipeline_options=None)
+        mock_analysis_service.create.assert_called_once_with(
+            "d1",
+            pipeline_options=None,
+            chunking_options=None,
+        )
 
     def test_create_analysis_with_pipeline_options(self, client, mock_analysis_service):
-        mock_analysis_service.create = AsyncMock(return_value=AnalysisJob(
-            id="j2", document_id="d1", document_filename="test.pdf",
-        ))
+        mock_analysis_service.create = AsyncMock(
+            return_value=AnalysisJob(
+                id="j2",
+                document_id="d1",
+                document_filename="test.pdf",
+            )
+        )
 
-        resp = client.post("/api/analyses", json={
-            "documentId": "d1",
-            "pipelineOptions": {
-                "do_ocr": False,
-                "do_table_structure": True,
-                "table_mode": "fast",
-                "do_code_enrichment": True,
-                "do_formula_enrichment": False,
-                "do_picture_classification": False,
-                "do_picture_description": False,
-                "generate_picture_images": True,
-                "generate_page_images": False,
-                "images_scale": 2.0,
-            }
-        })
+        resp = client.post(
+            "/api/analyses",
+            json={
+                "documentId": "d1",
+                "pipelineOptions": {
+                    "do_ocr": False,
+                    "do_table_structure": True,
+                    "table_mode": "fast",
+                    "do_code_enrichment": True,
+                    "do_formula_enrichment": False,
+                    "do_picture_classification": False,
+                    "do_picture_description": False,
+                    "generate_picture_images": True,
+                    "generate_page_images": False,
+                    "images_scale": 2.0,
+                },
+            },
+        )
         assert resp.status_code == 200
         data = resp.json()
         assert data["id"] == "j2"
@@ -191,14 +214,17 @@ class TestAnalysisEndpoints:
 
     def test_create_analysis_with_partial_pipeline_options(self, client, mock_analysis_service):
         """Pipeline options should use defaults for unspecified fields."""
-        mock_analysis_service.create = AsyncMock(return_value=AnalysisJob(
-            id="j3", document_id="d1", document_filename="test.pdf",
-        ))
+        mock_analysis_service.create = AsyncMock(
+            return_value=AnalysisJob(
+                id="j3",
+                document_id="d1",
+                document_filename="test.pdf",
+            )
+        )
 
-        resp = client.post("/api/analyses", json={
-            "documentId": "d1",
-            "pipelineOptions": {"do_ocr": False}
-        })
+        resp = client.post(
+            "/api/analyses", json={"documentId": "d1", "pipelineOptions": {"do_ocr": False}}
+        )
         assert resp.status_code == 200
 
         opts = mock_analysis_service.create.call_args.kwargs["pipeline_options"]
