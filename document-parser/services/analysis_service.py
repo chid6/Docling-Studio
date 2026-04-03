@@ -34,6 +34,10 @@ def _chunk_to_dict(c: ChunkResult) -> dict:
     }
 
 
+# Maximum number of concurrent analysis jobs to prevent resource exhaustion.
+_DEFAULT_MAX_CONCURRENT = 3
+
+
 class AnalysisService:
     """Orchestrates document analysis using an injected converter."""
 
@@ -42,10 +46,12 @@ class AnalysisService:
         converter: DocumentConverter,
         chunker: DocumentChunker | None = None,
         conversion_timeout: int = 600,
+        max_concurrent: int = _DEFAULT_MAX_CONCURRENT,
     ):
         self._converter = converter
         self._chunker = chunker
         self._conversion_timeout = conversion_timeout
+        self._semaphore = asyncio.Semaphore(max_concurrent)
 
     async def create(
         self,
@@ -113,7 +119,25 @@ class AnalysisService:
         pipeline_options: dict | None = None,
         chunking_options: dict | None = None,
     ) -> None:
-        """Background task: run conversion and optionally chunk."""
+        """Background task: run conversion and optionally chunk.
+
+        Acquires the concurrency semaphore to limit parallel conversions
+        and prevent CPU/memory exhaustion on modest hardware.
+        """
+        async with self._semaphore:
+            await self._run_analysis_inner(
+                job_id, file_path, filename, pipeline_options, chunking_options
+            )
+
+    async def _run_analysis_inner(
+        self,
+        job_id: str,
+        file_path: str,
+        filename: str,
+        pipeline_options: dict | None = None,
+        chunking_options: dict | None = None,
+    ) -> None:
+        """Inner analysis logic — called under the concurrency semaphore."""
         try:
             job = await analysis_repo.find_by_id(job_id)
             if not job:

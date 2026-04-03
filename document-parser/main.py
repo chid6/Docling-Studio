@@ -64,6 +64,7 @@ def _build_analysis_service() -> AnalysisService:
         converter=converter,
         chunker=chunker,
         conversion_timeout=settings.conversion_timeout,
+        max_concurrent=settings.max_concurrent_analyses,
     )
 
 
