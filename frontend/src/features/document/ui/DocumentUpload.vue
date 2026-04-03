@@ -42,7 +42,10 @@ function openFilePicker() {
 async function onFileSelect(e: Event) {
   const target = e.target as HTMLInputElement
   const file = target.files?.[0]
-  if (file) {
+  if (
+    file &&
+    (file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf'))
+  ) {
     try {
       store.clearError()
       const doc = await store.upload(file)
