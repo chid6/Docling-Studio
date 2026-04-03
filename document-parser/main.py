@@ -20,6 +20,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from api.analyses import router as analyses_router
 from api.documents import router as documents_router
+from infra.rate_limiter import RateLimiterMiddleware
 from infra.settings import settings
 from persistence.database import get_connection, init_db
 from services.analysis_service import AnalysisService
@@ -94,6 +95,7 @@ app.add_middleware(
     allow_methods=["GET", "POST", "DELETE", "OPTIONS"],
     allow_headers=["Content-Type", "Authorization"],
 )
+app.add_middleware(RateLimiterMiddleware, requests_per_window=100, window_seconds=60)
 
 app.include_router(documents_router)
 app.include_router(analyses_router)
