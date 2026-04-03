@@ -91,6 +91,11 @@ async def preview(
         return Response(content=png_bytes, media_type="image/png")
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e)) from e
+    except FileNotFoundError as exc:
+        raise HTTPException(status_code=404, detail="PDF file not found on disk") from exc
+    except OSError as exc:
+        logger.exception("I/O error generating preview for %s", doc_id)
+        raise HTTPException(status_code=422, detail="Failed to read PDF file") from exc
     except Exception as exc:
-        logger.exception("Failed to generate preview")
+        logger.exception("Unexpected error generating preview for %s", doc_id)
         raise HTTPException(status_code=422, detail="Failed to generate preview") from exc

@@ -192,5 +192,7 @@ async def _mark_failed(job_id: str, error: str) -> None:
         if job:
             job.mark_failed(error)
             await analysis_repo.update_status(job)
+    except OSError:
+        logger.exception("Database I/O error marking job %s as failed", job_id)
     except Exception:
-        logger.exception("Could not mark job %s as failed", job_id)
+        logger.exception("Unexpected error marking job %s as failed", job_id)

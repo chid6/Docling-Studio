@@ -79,8 +79,12 @@ async def delete(doc_id: str) -> bool:
             os.unlink(real_path)
         elif os.path.exists(doc.storage_path):
             logger.warning("Refused to delete file outside upload dir: %s", doc.storage_path)
+    except FileNotFoundError:
+        logger.info("File already removed: %s", doc.storage_path)
+    except PermissionError:
+        logger.error("Permission denied deleting file: %s", doc.storage_path)
     except OSError:
-        logger.warning("Could not delete file: %s", doc.storage_path)
+        logger.warning("Could not delete file: %s", doc.storage_path, exc_info=True)
 
     return await document_repo.delete(doc_id)
 
@@ -101,6 +105,9 @@ def _count_pages(file_content: bytes) -> int | None:
     try:
         info = pdfinfo_from_bytes(file_content)
         return info.get("Pages")
+    except (FileNotFoundError, OSError) as exc:
+        logger.warning("Could not count pages: %s", exc)
+        return None
     except Exception:
-        logger.warning("Could not count pages", exc_info=True)
+        logger.warning("Unexpected error counting pages", exc_info=True)
         return None
