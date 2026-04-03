@@ -21,7 +21,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from api.analyses import router as analyses_router
 from api.documents import router as documents_router
 from infra.settings import settings
-from persistence.database import init_db
+from persistence.database import get_connection, init_db
 from services.analysis_service import AnalysisService
 
 logging.basicConfig(
@@ -100,10 +100,20 @@ app.include_router(analyses_router)
 
 
 @app.get("/api/health")
-def health() -> dict[str, str]:
-    """Health check endpoint."""
+async def health() -> dict[str, str]:
+    """Health check endpoint — verifies database connectivity."""
+    db_status = "ok"
+    try:
+        async with get_connection() as db:
+            await db.execute("SELECT 1")
+    except Exception:
+        db_status = "error"
+        logger.warning("Health check: database unreachable", exc_info=True)
+
+    status = "ok" if db_status == "ok" else "degraded"
     return {
-        "status": "ok",
+        "status": status,
         "version": settings.app_version,
         "engine": settings.conversion_engine,
+        "database": db_status,
     }

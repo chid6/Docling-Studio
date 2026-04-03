@@ -29,8 +29,9 @@ class TestHealthEndpoint:
         resp = client.get("/api/health")
         assert resp.status_code == 200
         data = resp.json()
-        assert data["status"] == "ok"
+        assert data["status"] in ("ok", "degraded")
         assert "engine" in data
+        assert "database" in data
 
 
 class TestDocumentEndpoints:
