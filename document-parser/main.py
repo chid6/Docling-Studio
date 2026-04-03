@@ -19,7 +19,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from api.analyses import router as analyses_router
 from api.documents import router as documents_router
-from infra.settings import Settings
+from infra.settings import settings
 from persistence.database import init_db
 from services.analysis_service import AnalysisService
 
@@ -28,12 +28,6 @@ logging.basicConfig(
     format="%(asctime)s [%(levelname)s] %(name)s — %(message)s",
 )
 logger = logging.getLogger(__name__)
-
-# ---------------------------------------------------------------------------
-# Settings & dependency wiring
-# ---------------------------------------------------------------------------
-
-settings = Settings.from_env()
 
 
 def _build_converter():

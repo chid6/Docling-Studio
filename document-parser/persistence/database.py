@@ -8,9 +8,11 @@ from contextlib import asynccontextmanager
 
 import aiosqlite
 
+from infra.settings import settings
+
 logger = logging.getLogger(__name__)
 
-DB_PATH = os.environ.get("DB_PATH", "./data/docling_studio.db")
+DB_PATH = settings.db_path
 
 _SCHEMA = """
 CREATE TABLE IF NOT EXISTS documents (

@@ -21,6 +21,7 @@ class Settings:
 
     @classmethod
     def from_env(cls) -> Settings:
+        """Build a Settings instance from environment variables."""
         cors_raw = os.environ.get("CORS_ORIGINS", "http://localhost:3000,http://localhost:5173")
         return cls(
             app_version=os.environ.get("APP_VERSION", "dev"),
@@ -32,3 +33,7 @@ class Settings:
             db_path=os.environ.get("DB_PATH", "./data/docling_studio.db"),
             cors_origins=[o.strip() for o in cors_raw.split(",")],
         )
+
+
+# Module-level singleton — import this from other modules.
+settings = Settings.from_env()

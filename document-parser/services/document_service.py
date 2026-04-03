@@ -10,11 +10,12 @@ import uuid
 from pdf2image import convert_from_bytes, pdfinfo_from_bytes
 
 from domain.models import Document
+from infra.settings import settings
 from persistence import analysis_repo, document_repo
 
 logger = logging.getLogger(__name__)
 
-UPLOAD_DIR = os.environ.get("UPLOAD_DIR", "./uploads")
+UPLOAD_DIR = settings.upload_dir
 MAX_FILE_SIZE = 50 * 1024 * 1024  # 50 MB
 
 
