@@ -20,10 +20,7 @@
       ref="canvasRef"
       class="overlay-canvas"
       @mousemove="onMouseMove"
-      @mouseleave="
-        hoveredElement = null
-        emit('highlight-element', -1)
-      "
+      @mouseleave="onMouseLeave"
     />
     <div v-if="hoveredElement" class="tooltip" :style="tooltipStyle">
       <span
@@ -156,6 +153,11 @@ function draw(): void {
       ctx.fillRect(rect.x, rect.y, rect.w, rect.h)
     }
   }
+}
+
+function onMouseLeave(): void {
+  hoveredElement.value = null
+  emit('highlight-element', -1)
 }
 
 function onMouseMove(e: MouseEvent): void {
