@@ -32,6 +32,7 @@ class TestBuildFormData:
         assert data["do_picture_classification"] == "false"
         assert data["do_picture_description"] == "false"
         assert data["include_images"] == "false"
+        assert data["generate_page_images"] == "false"
         assert data["images_scale"] == "1.0"
         assert set(data["to_formats"]) == {"md", "html", "json"}
 

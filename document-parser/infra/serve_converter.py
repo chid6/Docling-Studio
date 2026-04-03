@@ -126,6 +126,7 @@ def _build_form_data(options: ConversionOptions) -> dict[str, str | list[str]]:
         "do_picture_classification": str(options.do_picture_classification).lower(),
         "do_picture_description": str(options.do_picture_description).lower(),
         "include_images": str(options.generate_picture_images).lower(),
+        "generate_page_images": str(options.generate_page_images).lower(),
         "images_scale": str(options.images_scale),
     }
 
