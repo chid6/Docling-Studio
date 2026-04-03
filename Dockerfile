@@ -70,7 +70,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 COPY document-parser/requirements-local.txt .
-RUN pip install --no-cache-dir -r requirements-local.txt
+RUN pip install --no-cache-dir torch torchvision --index-url https://download.pytorch.org/whl/cpu \
+    && pip install --no-cache-dir -r requirements-local.txt
 
 RUN chown -R appuser:appuser /app
 ENV CONVERSION_ENGINE=local
