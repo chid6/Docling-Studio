@@ -23,8 +23,14 @@ MAX_FILE_SIZE = 50 * 1024 * 1024  # 50 MB
 _PDF_MAGIC = b"%PDF"
 
 
+_UPLOAD_CHUNK_SIZE = 64 * 1024  # 64 KB chunks for streaming writes
+
+
 async def upload(filename: str, content_type: str, file_content: bytes) -> Document:
-    """Save uploaded file to disk and persist metadata."""
+    """Save uploaded file to disk and persist metadata.
+
+    Writes the file in fixed-size chunks to keep peak memory usage low.
+    """
     if len(file_content) > MAX_FILE_SIZE:
         raise ValueError("File too large (max 50 MB)")
 
@@ -37,8 +43,10 @@ async def upload(filename: str, content_type: str, file_content: bytes) -> Docum
     safe_name = f"{uuid.uuid4()}{ext}"
     file_path = os.path.join(UPLOAD_DIR, safe_name)
 
+    # Write in chunks to avoid doubling memory usage for large files
     with open(file_path, "wb") as f:
-        f.write(file_content)
+        for offset in range(0, len(file_content), _UPLOAD_CHUNK_SIZE):
+            f.write(file_content[offset : offset + _UPLOAD_CHUNK_SIZE])
 
     # Count PDF pages
     page_count = _count_pages(file_content)

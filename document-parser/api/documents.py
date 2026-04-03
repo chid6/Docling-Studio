@@ -13,6 +13,8 @@ from services import document_service
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/documents", tags=["documents"])
 
+_READ_CHUNK_SIZE = 64 * 1024  # 64 KB
+
 
 def _to_response(doc) -> DocumentResponse:
     return DocumentResponse(
@@ -35,7 +37,15 @@ async def upload(file: UploadFile) -> DocumentResponse:
     if file.size and file.size > document_service.MAX_FILE_SIZE:
         raise HTTPException(status_code=413, detail="File too large (max 50 MB)")
 
-    content = await file.read()
+    # Read in chunks to avoid holding the full upload in a single allocation
+    chunks: list[bytes] = []
+    total = 0
+    while chunk := await file.read(_READ_CHUNK_SIZE):
+        total += len(chunk)
+        if total > document_service.MAX_FILE_SIZE:
+            raise HTTPException(status_code=413, detail="File too large (max 50 MB)")
+        chunks.append(chunk)
+    content = b"".join(chunks)
 
     try:
         doc = await document_service.upload(
