@@ -1,21 +1,29 @@
-"""Tests for pipeline options — build_converter, convert_document routing, service forwarding."""
+"""Tests for pipeline options — build_converter, convert_document routing, service forwarding.
+
+Requires the ``docling`` library (heavy, includes torch). Tests are skipped
+automatically when docling is not installed (e.g. in lightweight CI environments
+that only install docling-core).
+"""
 
 from __future__ import annotations
 
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
-from docling.datamodel.base_models import InputFormat
-from docling.datamodel.pipeline_options import (
+
+docling = pytest.importorskip("docling", reason="docling library not installed")
+
+from docling.datamodel.base_models import InputFormat  # noqa: E402
+from docling.datamodel.pipeline_options import (  # noqa: E402
     PdfPipelineOptions,
     TableFormerMode,
 )
 
-from domain.value_objects import ConversionOptions
-from infra.local_converter import (
+from domain.value_objects import ConversionOptions  # noqa: E402
+from infra.local_converter import (  # noqa: E402
     _build_docling_converter as build_converter,
 )
-from infra.local_converter import (
+from infra.local_converter import (  # noqa: E402
     _convert_sync as convert_document,
 )
 
