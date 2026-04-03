@@ -32,6 +32,7 @@ class TestBuildFormData:
         assert data["do_picture_classification"] == "false"
         assert data["do_picture_description"] == "false"
         assert data["include_images"] == "false"
+        assert data["generate_page_images"] == "false"
         assert data["images_scale"] == "1.0"
         assert set(data["to_formats"]) == {"md", "html", "json"}
 
@@ -74,6 +75,7 @@ class TestParseResponse:
         assert result.content_html == "<h1>Hello</h1>"
         assert result.page_count == 1
         assert result.pages[0].width == 612.0
+        assert result.document_json is not None
 
     def test_response_with_elements(self):
         data = {
@@ -159,6 +161,7 @@ class TestParseResponse:
         assert result.content_markdown == "text"
         assert result.pages == []
         assert result.page_count == 1
+        assert result.document_json is None
 
     def test_json_content_as_string(self):
         json_doc = {
