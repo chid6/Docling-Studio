@@ -10,6 +10,7 @@ from dataclasses import dataclass, field
 class Settings:
     app_version: str = "dev"
     conversion_engine: str = "local"  # "local" or "remote"
+    deployment_mode: str = "self-hosted"  # "self-hosted" or "huggingface"
     docling_serve_url: str = "http://localhost:5001"
     docling_serve_api_key: str | None = None
     conversion_timeout: int = 600
@@ -27,6 +28,7 @@ class Settings:
         return cls(
             app_version=os.environ.get("APP_VERSION", "dev"),
             conversion_engine=os.environ.get("CONVERSION_ENGINE", "local"),
+            deployment_mode=os.environ.get("DEPLOYMENT_MODE", "self-hosted"),
             docling_serve_url=os.environ.get("DOCLING_SERVE_URL", "http://localhost:5001"),
             docling_serve_api_key=os.environ.get("DOCLING_SERVE_API_KEY"),
             conversion_timeout=int(os.environ.get("CONVERSION_TIMEOUT", "600")),

@@ -117,5 +117,6 @@ async def health() -> dict[str, str]:
         "status": status,
         "version": settings.app_version,
         "engine": settings.conversion_engine,
+        "deploymentMode": settings.deployment_mode,
         "database": db_status,
     }

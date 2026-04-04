@@ -10,6 +10,7 @@ class TestSettingsDefaults:
         s = Settings()
         assert s.app_version == "dev"
         assert s.conversion_engine == "local"
+        assert s.deployment_mode == "self-hosted"
         assert s.docling_serve_url == "http://localhost:5001"
         assert s.docling_serve_api_key is None
         assert s.conversion_timeout == 600
@@ -30,6 +31,7 @@ class TestSettingsFromEnv:
     def test_reads_env_vars(self, monkeypatch):
         monkeypatch.setenv("APP_VERSION", "1.2.3")
         monkeypatch.setenv("CONVERSION_ENGINE", "remote")
+        monkeypatch.setenv("DEPLOYMENT_MODE", "huggingface")
         monkeypatch.setenv("DOCLING_SERVE_URL", "http://serve:9000")
         monkeypatch.setenv("DOCLING_SERVE_API_KEY", "secret-key")
         monkeypatch.setenv("CONVERSION_TIMEOUT", "120")
@@ -41,6 +43,7 @@ class TestSettingsFromEnv:
 
         assert s.app_version == "1.2.3"
         assert s.conversion_engine == "remote"
+        assert s.deployment_mode == "huggingface"
         assert s.docling_serve_url == "http://serve:9000"
         assert s.docling_serve_api_key == "secret-key"
         assert s.conversion_timeout == 120
@@ -53,6 +56,7 @@ class TestSettingsFromEnv:
         for key in (
             "APP_VERSION",
             "CONVERSION_ENGINE",
+            "DEPLOYMENT_MODE",
             "DOCLING_SERVE_URL",
             "DOCLING_SERVE_API_KEY",
             "CONVERSION_TIMEOUT",

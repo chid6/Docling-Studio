@@ -3,13 +3,15 @@ import { ref, computed } from 'vue'
 import { apiFetch } from '../../shared/api/http'
 
 type ConversionEngine = 'local' | 'remote'
+type DeploymentMode = 'self-hosted' | 'huggingface'
 
 interface HealthResponse {
   status: string
   engine: ConversionEngine
+  deploymentMode?: DeploymentMode
 }
 
-export type FeatureFlag = 'chunking'
+export type FeatureFlag = 'chunking' | 'disclaimer'
 
 interface FeatureFlagDef {
   description: string
@@ -18,6 +20,7 @@ interface FeatureFlagDef {
 
 interface FeatureFlagContext {
   engine: ConversionEngine | null
+  deploymentMode: DeploymentMode | null
 }
 
 const featureRegistry: Record<FeatureFlag, FeatureFlagDef> = {
@@ -25,15 +28,21 @@ const featureRegistry: Record<FeatureFlag, FeatureFlagDef> = {
     description: 'Document chunking for RAG preparation',
     isEnabled: (ctx) => ctx.engine === 'local',
   },
+  disclaimer: {
+    description: 'Show shared-instance disclaimer banner',
+    isEnabled: (ctx) => ctx.deploymentMode === 'huggingface',
+  },
 }
 
 export const useFeatureFlagStore = defineStore('feature-flags', () => {
   const engine = ref<ConversionEngine | null>(null)
+  const deploymentMode = ref<DeploymentMode | null>(null)
   const loaded = ref(false)
   const error = ref<string | null>(null)
 
   const context = computed<FeatureFlagContext>(() => ({
     engine: engine.value,
+    deploymentMode: deploymentMode.value,
   }))
 
   function isEnabled(flag: FeatureFlag): boolean {
@@ -46,6 +55,7 @@ export const useFeatureFlagStore = defineStore('feature-flags', () => {
     try {
       const data = await apiFetch<HealthResponse>('/api/health')
       engine.value = data.engine
+      deploymentMode.value = data.deploymentMode ?? 'self-hosted'
       loaded.value = true
       error.value = null
     } catch (e) {
@@ -54,5 +64,5 @@ export const useFeatureFlagStore = defineStore('feature-flags', () => {
     }
   }
 
-  return { engine, loaded, error, isEnabled, load }
+  return { engine, deploymentMode, loaded, error, isEnabled, load }
 })

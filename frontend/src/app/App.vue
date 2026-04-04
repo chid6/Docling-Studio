@@ -29,6 +29,13 @@
       </button>
     </header>
 
+    <div v-if="showDisclaimer" class="disclaimer-banner" role="alert">
+      {{ t('disclaimer.banner') }}
+      <button class="disclaimer-close" @click="dismissDisclaimer" aria-label="Close">
+        &times;
+      </button>
+    </div>
+
     <div class="app-body">
       <AppSidebar :open="sidebarOpen" />
       <main class="main">
@@ -39,11 +46,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { RouterView, useRouter } from 'vue-router'
 import { AppSidebar } from '../shared/ui/index'
 import { useSettingsStore } from '../features/settings/store'
 import { useDocumentStore } from '../features/document/store'
+import { useFeatureFlag } from '../features/feature-flags'
 import { useI18n } from '../shared/i18n'
 
 useSettingsStore()
@@ -52,6 +60,13 @@ const router = useRouter()
 const documentStore = useDocumentStore()
 
 const sidebarOpen = ref(true)
+const disclaimerEnabled = useFeatureFlag('disclaimer')
+const disclaimerDismissed = ref(false)
+const showDisclaimer = computed(() => disclaimerEnabled.value && !disclaimerDismissed.value)
+
+function dismissDisclaimer() {
+  disclaimerDismissed.value = true
+}
 
 function newAnalysis() {
   documentStore.selectedId = null
@@ -141,6 +156,36 @@ body {
   display: flex;
   flex-direction: column;
   height: 100vh;
+}
+
+.disclaimer-banner {
+  background: #f59e0b;
+  color: #1a1a1d;
+  font-size: 13px;
+  font-weight: 500;
+  text-align: center;
+  padding: 8px 40px 8px 16px;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.disclaimer-close {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #1a1a1d;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 0 4px;
+  line-height: 1;
+  opacity: 0.7;
+}
+
+.disclaimer-close:hover {
+  opacity: 1;
 }
 
 .topbar {
