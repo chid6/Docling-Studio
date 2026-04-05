@@ -99,6 +99,28 @@ These options map directly to Docling's [`PdfPipelineOptions`](https://docling-p
 | `generate_page_images` | `false` | Rasterize each page as an image |
 | `images_scale` | `1.0` | Scale factor for generated images (0.1–10) |
 
+## Chunking Options
+
+!!! note
+    Chunking is only available in **local** mode. The chunking UI is hidden when using remote mode (Docling Serve).
+
+After a document is analyzed, you can split the extracted content into semantic chunks. Chunking can be configured at analysis time or re-run later with different options via the **rechunk** action.
+
+| Option | Default | Description |
+|--------|---------|-------------|
+| `chunker_type` | `hybrid` | `hybrid` (semantic + structural), `hierarchical` (heading-based), or `page` (one chunk per page) |
+| `max_tokens` | `512` | Maximum tokens per chunk |
+| `merge_peers` | `true` | Merge sibling elements under the same heading |
+| `repeat_table_header` | `true` | Repeat table headers when a table is split across chunks |
+
+Each chunk includes:
+
+- **text** — the chunk content
+- **headings** — heading hierarchy leading to the chunk
+- **source_page** — the page number the chunk originates from
+- **token_count** — number of tokens in the chunk
+- **bboxes** — bounding boxes of the chunk's source elements (page + coordinates)
+
 ## Configuration
 
 All configuration is done via environment variables:
@@ -112,6 +134,9 @@ All configuration is done via environment variables:
 | `UPLOAD_DIR` | `./uploads` | File storage directory |
 | `DB_PATH` | `./data/docling_studio.db` | SQLite database path |
 | `CONVERSION_TIMEOUT` | `600` | Max seconds per Docling conversion |
+| `MAX_CONCURRENT_ANALYSES` | `3` | Maximum parallel analysis jobs |
+| `DEPLOYMENT_MODE` | `self-hosted` | `self-hosted` or `huggingface` (shows disclaimer banner) |
+| `APP_VERSION` | `dev` | Application version (set automatically by CI/Docker) |
 
 ## System Requirements
 
