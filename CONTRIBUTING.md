@@ -67,11 +67,11 @@ npx prettier --write src/   # auto-format
 ## Running Tests
 
 ```bash
-# Backend (99 tests)
+# Backend (199 tests)
 cd document-parser
 pytest tests/ -v
 
-# Frontend (81 tests)
+# Frontend (129 tests)
 cd frontend
 npm run test:run
 ```

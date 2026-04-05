@@ -61,7 +61,7 @@ document-parser/
 ├── services/                 # Use case orchestration
 │   ├── document_service.py   # Upload, delete, preview
 │   └── analysis_service.py   # Async Docling processing
-└── tests/                    # 99 tests (pytest)
+└── tests/                    # 199 tests (pytest)
 ```
 
 ### Frontend structure (feature-based)
@@ -149,12 +149,12 @@ npm run dev
 ### Running Tests
 
 ```bash
-# Backend (99 tests)
+# Backend (199 tests)
 cd document-parser
 pip install pytest pytest-asyncio httpx
 pytest tests/ -v
 
-# Frontend (81 tests)
+# Frontend (129 tests)
 cd frontend
 npm run test:run
 ```
