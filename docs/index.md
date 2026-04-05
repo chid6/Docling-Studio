@@ -31,7 +31,7 @@ Upload a PDF, configure the extraction pipeline, and visualize the results — t
 
 ```bash
 # Docker (fastest)
-docker run -p 3000:3000 ghcr.io/scub-france/docling-studio:latest
+docker run -p 3000:3000 ghcr.io/scub-france/docling-studio:latest-local
 ```
 
 Open [http://localhost:3000](http://localhost:3000) and upload a PDF.
