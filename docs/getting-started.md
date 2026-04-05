@@ -7,6 +7,8 @@ Docling Studio ships two Docker image variants:
 | **remote** | `latest-remote` | ~270 MB | Lightweight — delegates to an external [Docling Serve](https://github.com/DS4SD/docling-serve) instance |
 | **local** | `latest-local` | ~1.9 GB | Full — runs Docling in-process, CPU-only (downloads ML models on first run) |
 
+![Docker architecture](images/docker.png){ width="600" }
+
 ## Docker — remote mode (fastest)
 
 ```bash

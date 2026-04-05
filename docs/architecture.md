@@ -2,7 +2,7 @@
 
 ## Overview
 
-![Docling Studio architecture](images/archi.png){ width="700" }
+![Docling Studio architecture](images/global.png){ width="700" }
 
 Two services communicating via REST. The frontend is a Vue 3 SPA served by Nginx in production. The backend is a FastAPI app that wraps Docling's document conversion engine.
 
