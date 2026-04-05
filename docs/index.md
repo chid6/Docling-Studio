@@ -11,11 +11,16 @@ Upload a PDF, configure the extraction pipeline, and visualize the results — t
 ## Features
 
 - **PDF viewer** with page navigation, bounding box overlay, and resizable results panel
-- **Configurable Docling pipeline** — OCR, table extraction, code/formula enrichment, picture classification & description
+- **Configurable Docling pipeline** — OCR, table extraction, code/formula enrichment, picture classification & description, image generation
 - **Bounding box visualization** — color-coded element overlay directly on the PDF
+- **Chunking** — split extracted content into semantic chunks (hierarchical, hybrid, or page-based) with configurable token limits
 - **Markdown & HTML export** of extracted content
 - **Document management** — upload, list, delete
 - **Analysis history** — re-visit and open past analyses
+- **Feature flags** — capabilities adapt to the conversion engine (local vs remote)
+- **Rate limiting** — 60 requests per minute per IP to protect the backend
+- **Deployment modes** — self-hosted (default) or HuggingFace Spaces (with disclaimer banner)
+- **Health endpoint** — `/api/health` reports engine type, deployment mode, and database status
 - **Dark / Light theme** and **FR / EN** localization
 
 ## Tech Stack
