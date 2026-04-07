@@ -20,7 +20,7 @@ class TestOnTaskDone:
 
         # Create a task that raises
         async def failing_task():
-            raise RuntimeError("boom")
+            raise RuntimeError("unexpected failure")
 
         task = asyncio.create_task(failing_task())
         await asyncio.sleep(0)  # let the task fail
@@ -30,7 +30,26 @@ class TestOnTaskDone:
             # ensure_future schedules it; give the event loop a tick
             await asyncio.sleep(0)
 
-        mock_mark.assert_called_once_with(job_id, "boom")
+        mock_mark.assert_called_once_with(job_id, "unexpected failure")
+
+    @pytest.mark.asyncio
+    async def test_exception_uses_classify_error(self):
+        """_on_task_done should route exceptions through _classify_error."""
+        job_id = "job-classify"
+
+        async def timeout_task():
+            raise TimeoutError("timeout exceeded while processing")
+
+        task = asyncio.create_task(timeout_task())
+        await asyncio.sleep(0)
+
+        with patch("services.analysis_service._mark_failed", new_callable=AsyncMock) as mock_mark:
+            _on_task_done(task, job_id=job_id)
+            await asyncio.sleep(0)
+
+        mock_mark.assert_called_once_with(
+            job_id, "Processing took too long — try with fewer pages or simpler options"
+        )
 
     @pytest.mark.asyncio
     async def test_cancelled_task_marks_job_failed(self):

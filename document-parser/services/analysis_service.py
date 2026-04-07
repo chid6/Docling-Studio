@@ -232,7 +232,7 @@ def _on_task_done(task: asyncio.Task, *, job_id: str) -> None:
     exc = task.exception()
     if exc:
         logger.error("Unhandled exception in analysis task %s: %s", job_id, exc, exc_info=True)
-        _schedule_mark_failed(job_id, str(exc))
+        _schedule_mark_failed(job_id, _classify_error(exc))
 
 
 def _schedule_mark_failed(job_id: str, error: str) -> None:
