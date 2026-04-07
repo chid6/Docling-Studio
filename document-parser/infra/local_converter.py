@@ -118,7 +118,11 @@ def _build_docling_converter(options: ConversionOptions) -> DoclingConverter:
 def _get_default_converter() -> DoclingConverter:
     global _default_converter
     if _default_converter is None:
-        _default_converter = _build_docling_converter(ConversionOptions())
+        try:
+            _default_converter = _build_docling_converter(ConversionOptions())
+        except Exception:
+            _default_converter = None
+            raise
     return _default_converter
 
 
