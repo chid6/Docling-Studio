@@ -46,6 +46,18 @@ class Settings:
             errors.append(
                 f"default_table_mode must be 'accurate' or 'fast' (got '{self.default_table_mode}')"
             )
+        # Timeout cascade: document_timeout < lock_timeout < conversion_timeout
+        if self.document_timeout > 0 and self.lock_timeout > 0 and self.conversion_timeout > 0:
+            if self.document_timeout >= self.lock_timeout:
+                errors.append(
+                    f"document_timeout ({self.document_timeout}s) must be "
+                    f"< lock_timeout ({self.lock_timeout}s)"
+                )
+            if self.lock_timeout >= self.conversion_timeout:
+                errors.append(
+                    f"lock_timeout ({self.lock_timeout}s) must be "
+                    f"< conversion_timeout ({self.conversion_timeout}s)"
+                )
         if errors:
             raise ValueError("Invalid settings:\n  " + "\n  ".join(errors))
 
