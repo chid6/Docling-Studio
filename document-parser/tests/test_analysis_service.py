@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import functools
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -88,6 +89,60 @@ class TestOnTaskDone:
             await asyncio.sleep(0)
 
         mock_mark.assert_not_called()
+
+
+class TestAnalysisServiceCancellation:
+    """Verify delete cancels running tasks."""
+
+    @pytest.mark.asyncio
+    async def test_delete_cancels_running_task(self):
+        """Deleting a job while running should cancel its task."""
+        converter = MagicMock()
+        service = AnalysisService(converter=converter)
+
+        blocker = asyncio.Event()
+
+        async def slow_analysis():
+            await blocker.wait()
+
+        task = asyncio.create_task(slow_analysis())
+        service._running_tasks["j1"] = task
+
+        with patch("services.analysis_service.analysis_repo") as mock_repo:
+            mock_repo.delete = AsyncMock(return_value=True)
+            result = await service.delete("j1")
+
+        assert result is True
+        assert task.cancelling() or task.cancelled()
+        assert "j1" not in service._running_tasks
+
+    @pytest.mark.asyncio
+    async def test_delete_completed_job_no_error(self):
+        """Deleting a completed job should not raise even if no task tracked."""
+        converter = MagicMock()
+        service = AnalysisService(converter=converter)
+
+        with patch("services.analysis_service.analysis_repo") as mock_repo:
+            mock_repo.delete = AsyncMock(return_value=True)
+            result = await service.delete("j-gone")
+
+        assert result is True
+
+    @pytest.mark.asyncio
+    async def test_task_cleaned_from_running_on_completion(self):
+        """After a task completes, it should be removed from _running_tasks."""
+        converter = MagicMock()
+        service = AnalysisService(converter=converter)
+
+        async def instant():
+            pass
+
+        task = asyncio.create_task(instant())
+        service._running_tasks["j1"] = task
+        task.add_done_callback(functools.partial(service._on_task_done, job_id="j1"))
+        await task
+
+        assert "j1" not in service._running_tasks
 
 
 class TestAnalysisServiceConcurrency:
