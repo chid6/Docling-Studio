@@ -1,3 +1,13 @@
+---
+title: Docling Studio
+emoji: 📄
+colorFrom: yellow
+colorTo: blue
+sdk: docker
+app_port: 3000
+pinned: false
+---
+
 # Docling Studio
 
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)

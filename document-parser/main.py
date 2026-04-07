@@ -102,7 +102,7 @@ app.include_router(analyses_router)
 
 
 @app.get("/api/health")
-async def health() -> dict[str, str]:
+async def health() -> dict[str, str | int]:
     """Health check endpoint — verifies database connectivity."""
     db_status = "ok"
     try:
