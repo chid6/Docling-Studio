@@ -191,7 +191,33 @@ class AnalysisService:
 
         except Exception as e:
             logger.exception("Analysis failed: %s", job_id)
-            await _mark_failed(job_id, str(e))
+            await _mark_failed(job_id, _classify_error(e))
+
+
+def _classify_error(exc: Exception) -> str:
+    """Return a user-friendly error message based on the exception type/content."""
+    msg = str(exc).lower()
+
+    if "invalidcxxcompiler" in msg or "no working c++ compiler" in msg:
+        return "Missing C++ compiler — set TORCHDYNAMO_DISABLE=1 to work around this"
+
+    if "out of memory" in msg or "oom" in msg:
+        return "Out of memory — try a smaller document or disable table structure analysis"
+
+    if "could not acquire converter lock" in msg:
+        return "Server busy — a previous conversion is still running. Please retry later"
+
+    if "pipeline" in msg and "failed" in msg:
+        return "Document processing failed — the document may be corrupted or unsupported"
+
+    if "timeout" in msg:
+        return "Processing took too long — try with fewer pages or simpler options"
+
+    # Fallback: truncate raw error to something reasonable
+    raw = str(exc)
+    if len(raw) > 200:
+        raw = raw[:200] + "…"
+    return raw
 
 
 _background_tasks: set[asyncio.Task] = set()
