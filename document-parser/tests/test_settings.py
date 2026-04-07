@@ -15,6 +15,7 @@ class TestSettingsDefaults:
         assert s.docling_serve_api_key is None
         assert s.conversion_timeout == 900
         assert s.document_timeout == 120.0
+        assert s.lock_timeout == 300
         assert s.max_page_count == 0
         assert s.upload_dir == "./uploads"
         assert s.db_path == "./data/docling_studio.db"
@@ -65,6 +66,12 @@ class TestSettingsValidation:
 
         with pytest.raises(ValueError, match="max_file_size must be >= 0"):
             Settings(max_file_size=-1)
+
+    def test_zero_lock_timeout_rejected(self):
+        import pytest
+
+        with pytest.raises(ValueError, match="lock_timeout must be > 0"):
+            Settings(lock_timeout=0)
 
     def test_invalid_table_mode_rejected(self):
         import pytest
