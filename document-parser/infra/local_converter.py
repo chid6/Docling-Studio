@@ -42,11 +42,14 @@ from domain.value_objects import (
     PageElement,
 )
 from infra.bbox import to_topleft_list
+from infra.settings import settings
 
 logger = logging.getLogger(__name__)
 
-# Thread lock — DoclingConverter is not thread-safe
+# Thread lock — DoclingConverter is not thread-safe.
+# Uses a timeout to prevent a frozen conversion from blocking all others.
 _converter_lock = threading.Lock()
+_LOCK_TIMEOUT = 300  # seconds — fail fast rather than wait forever
 
 # US Letter page dimensions (points) — fallback when page size is unknown
 _DEFAULT_PAGE_WIDTH = 612.0
@@ -102,6 +105,7 @@ def _build_docling_converter(options: ConversionOptions) -> DoclingConverter:
         generate_page_images=options.generate_page_images,
         generate_picture_images=options.generate_picture_images,
         images_scale=options.images_scale,
+        document_timeout=settings.document_timeout,
     )
 
     return DoclingConverter(
@@ -114,7 +118,11 @@ def _build_docling_converter(options: ConversionOptions) -> DoclingConverter:
 def _get_default_converter() -> DoclingConverter:
     global _default_converter
     if _default_converter is None:
-        _default_converter = _build_docling_converter(ConversionOptions())
+        try:
+            _default_converter = _build_docling_converter(ConversionOptions())
+        except Exception:
+            _default_converter = None
+            raise
     return _default_converter
 
 
@@ -210,9 +218,22 @@ def _process_content_item(
 
 
 def _convert_sync(file_path: str, options: ConversionOptions) -> ConversionResult:
-    with _converter_lock:
+    acquired = _converter_lock.acquire(timeout=_LOCK_TIMEOUT)
+    if not acquired:
+        raise TimeoutError(
+            f"Could not acquire converter lock within {_LOCK_TIMEOUT}s — "
+            "a previous conversion may be frozen"
+        )
+    try:
         conv = _select_converter(options)
-        result = conv.convert(file_path)
+        kwargs: dict = {}
+        if settings.max_page_count > 0:
+            kwargs["max_num_pages"] = settings.max_page_count
+        if settings.max_file_size > 0:
+            kwargs["max_file_size"] = settings.max_file_size
+        result = conv.convert(file_path, **kwargs)
+    finally:
+        _converter_lock.release()
 
     doc = result.document
     page_count = len(doc.pages)
