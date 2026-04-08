@@ -8,6 +8,7 @@ from fastapi import APIRouter, HTTPException, Query, UploadFile
 from fastapi.responses import Response
 
 from api.schemas import DocumentResponse
+from infra.settings import settings
 from services import document_service
 
 logger = logging.getLogger(__name__)
@@ -34,16 +35,18 @@ async def upload(file: UploadFile) -> DocumentResponse:
         raise HTTPException(status_code=400, detail="No filename provided")
 
     # Reject early if Content-Length exceeds limit (before reading body)
-    if file.size and file.size > document_service.MAX_FILE_SIZE:
-        raise HTTPException(status_code=413, detail="File too large (max 5 MB)")
+    _max = document_service.MAX_FILE_SIZE
+    _detail = f"File too large (max {settings.max_file_size_mb} MB)"
+    if _max > 0 and file.size and file.size > _max:
+        raise HTTPException(status_code=413, detail=_detail)
 
     # Read in chunks to avoid holding the full upload in a single allocation
     chunks: list[bytes] = []
     total = 0
     while chunk := await file.read(_READ_CHUNK_SIZE):
         total += len(chunk)
-        if total > document_service.MAX_FILE_SIZE:
-            raise HTTPException(status_code=413, detail="File too large (max 5 MB)")
+        if _max > 0 and total > _max:
+            raise HTTPException(status_code=413, detail=_detail)
         chunks.append(chunk)
     content = b"".join(chunks)
 

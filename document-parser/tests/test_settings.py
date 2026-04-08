@@ -17,6 +17,7 @@ class TestSettingsDefaults:
         assert s.document_timeout == 120.0
         assert s.lock_timeout == 300
         assert s.max_page_count == 0
+        assert s.max_file_size_mb == 50
         assert s.batch_page_size == 0
         assert s.upload_dir == "./uploads"
         assert s.db_path == "./data/docling_studio.db"
@@ -67,6 +68,20 @@ class TestSettingsValidation:
 
         with pytest.raises(ValueError, match="max_file_size must be >= 0"):
             Settings(max_file_size=-1)
+
+    def test_negative_max_file_size_mb_rejected(self):
+        import pytest
+
+        with pytest.raises(ValueError, match="max_file_size_mb must be >= 0"):
+            Settings(max_file_size_mb=-1)
+
+    def test_zero_max_file_size_mb_accepted(self):
+        s = Settings(max_file_size_mb=0)
+        assert s.max_file_size_mb == 0
+
+    def test_positive_max_file_size_mb_accepted(self):
+        s = Settings(max_file_size_mb=100)
+        assert s.max_file_size_mb == 100
 
     def test_negative_batch_page_size_rejected(self):
         import pytest
@@ -129,6 +144,7 @@ class TestSettingsFromEnv:
         monkeypatch.setenv("DOCUMENT_TIMEOUT", "60.0")
         monkeypatch.setenv("LOCK_TIMEOUT", "600")
         monkeypatch.setenv("MAX_PAGE_COUNT", "20")
+        monkeypatch.setenv("MAX_FILE_SIZE_MB", "100")
         monkeypatch.setenv("BATCH_PAGE_SIZE", "15")
         monkeypatch.setenv("UPLOAD_DIR", "/data/uploads")
         monkeypatch.setenv("DB_PATH", "/data/test.db")
@@ -145,6 +161,7 @@ class TestSettingsFromEnv:
         assert s.lock_timeout == 600
         assert s.document_timeout == 60.0
         assert s.max_page_count == 20
+        assert s.max_file_size_mb == 100
         assert s.batch_page_size == 15
         assert s.upload_dir == "/data/uploads"
         assert s.db_path == "/data/test.db"

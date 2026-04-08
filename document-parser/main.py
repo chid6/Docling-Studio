@@ -122,4 +122,6 @@ async def health() -> dict[str, str | int]:
     }
     if settings.max_page_count > 0:
         result["maxPageCount"] = settings.max_page_count
+    if settings.max_file_size_mb > 0:
+        result["maxFileSizeMb"] = settings.max_file_size_mb
     return result
