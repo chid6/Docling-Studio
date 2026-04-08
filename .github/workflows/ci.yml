@@ -94,7 +94,7 @@ jobs:
 
       - name: Generate test PDFs
         run: |
-          pip install pypdfium2
+          pip install fpdf2 pypdfium2
           python e2e/generate-test-data.py
 
       - name: Start stack
