@@ -33,6 +33,12 @@ class TestHealthEndpoint:
         assert "engine" in data
         assert "database" in data
 
+    def test_health_exposes_max_file_size_mb(self, client):
+        resp = client.get("/api/health")
+        data = resp.json()
+        assert "maxFileSizeMb" in data
+        assert data["maxFileSizeMb"] == 50
+
 
 class TestDocumentEndpoints:
     @patch("services.document_service.find_all", new_callable=AsyncMock)

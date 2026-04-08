@@ -44,11 +44,14 @@ const fileInput = ref<HTMLInputElement | null>(null)
 const dragging = ref(false)
 
 const uploadHint = computed(() => {
-  const size = t('upload.maxSize')
-  if (flags.maxPageCount > 0) {
-    return `${size} · ${t('upload.maxPages').replace('{n}', String(flags.maxPageCount))}`
+  const parts: string[] = []
+  if (flags.maxFileSizeMb > 0) {
+    parts.push(t('upload.maxSize').replace('{n}', String(flags.maxFileSizeMb)))
   }
-  return size
+  if (flags.maxPageCount > 0) {
+    parts.push(t('upload.maxPages').replace('{n}', String(flags.maxPageCount)))
+  }
+  return parts.join(' · ')
 })
 
 function openFilePicker() {

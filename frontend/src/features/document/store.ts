@@ -1,11 +1,11 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import type { Document } from '../../shared/types'
+import { useFeatureFlagStore } from '../feature-flags/store'
 import * as api from './api'
 
-const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5 MB
-
 export const useDocumentStore = defineStore('document', () => {
+  const flags = useFeatureFlagStore()
   const documents = ref<Document[]>([])
   const selectedId = ref<string | null>(null)
   const uploading = ref(false)
@@ -26,8 +26,9 @@ export const useDocumentStore = defineStore('document', () => {
   }
 
   async function upload(file: File): Promise<Document> {
-    if (file.size > MAX_FILE_SIZE) {
-      error.value = 'File too large (max 5 MB)'
+    const maxMb = flags.maxFileSizeMb
+    if (maxMb > 0 && file.size > maxMb * 1024 * 1024) {
+      error.value = `File too large (max ${maxMb} MB)`
       throw new Error(error.value)
     }
     uploading.value = true
