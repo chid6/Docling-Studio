@@ -83,6 +83,18 @@ class AnalysisRepository(Protocol):
 
 
 @runtime_checkable
+class EmbeddingService(Protocol):
+    """Port for text-to-vector embedding.
+
+    Implementations may call a local model, a remote microservice, etc.
+    """
+
+    async def embed(self, texts: list[str]) -> list[list[float]]:
+        """Generate embedding vectors for a batch of texts."""
+        ...
+
+
+@runtime_checkable
 class VectorStore(Protocol):
     """Port for vector storage and retrieval.
 
