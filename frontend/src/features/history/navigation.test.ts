@@ -14,6 +14,11 @@ vi.mock('../analysis/api', () => ({
   deleteAnalysis: vi.fn(),
 }))
 
+vi.mock('./api', () => ({
+  fetchHistory: vi.fn(),
+  deleteHistoryEntry: vi.fn(),
+}))
+
 vi.mock('../document/api', () => ({
   fetchDocuments: vi.fn(),
   uploadDocument: vi.fn(),
@@ -33,8 +38,8 @@ describe('History → Studio navigation', () => {
 
   describe('History store provides data for navigation', () => {
     it('analyses contain documentId for document selection', async () => {
-      const { fetchAnalyses } = await import('../analysis/api')
-      fetchAnalyses.mockResolvedValue([
+      const { fetchHistory } = await import('./api')
+      fetchHistory.mockResolvedValue([
         { id: 'a1', documentId: 'd1', documentFilename: 'test.pdf', status: 'COMPLETED' },
         { id: 'a2', documentId: 'd2', documentFilename: 'other.pdf', status: 'FAILED' },
       ])

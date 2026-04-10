@@ -1,5 +1,5 @@
 import type { Locale } from './types'
-import { useSettingsStore } from '../features/settings/store'
+import { appLocale } from './appConfig'
 
 type MessageMap = Record<string, string>
 type Messages = Record<Locale, MessageMap>
@@ -268,10 +268,8 @@ const messages: Messages = {
 }
 
 export function useI18n() {
-  const settings = useSettingsStore()
-
   function t(key: string, params: Record<string, string | number> = {}): string {
-    let str = messages[settings.locale]?.[key] || messages['fr'][key] || key
+    let str = messages[appLocale.value]?.[key] || messages['fr'][key] || key
     for (const [k, v] of Object.entries(params)) {
       str = str.replaceAll(`{${k}}`, String(v))
     }

@@ -20,6 +20,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from api.analyses import router as analyses_router
 from api.documents import router as documents_router
+from api.schemas import HealthResponse
 from infra.rate_limiter import RateLimiterMiddleware
 from infra.settings import settings
 from persistence.analysis_repo import SqliteAnalysisRepository
@@ -141,8 +142,8 @@ app.include_router(documents_router)
 app.include_router(analyses_router)
 
 
-@app.get("/api/health")
-async def health() -> dict[str, str | int]:
+@app.get("/api/health", response_model=HealthResponse)
+async def health() -> HealthResponse:
     """Health check endpoint — verifies database connectivity."""
     db_status = "ok"
     try:
@@ -153,15 +154,12 @@ async def health() -> dict[str, str | int]:
         logger.warning("Health check: database unreachable", exc_info=True)
 
     status = "ok" if db_status == "ok" else "degraded"
-    result: dict[str, str | int] = {
-        "status": status,
-        "version": settings.app_version,
-        "engine": settings.conversion_engine,
-        "deploymentMode": settings.deployment_mode,
-        "database": db_status,
-    }
-    if settings.max_page_count > 0:
-        result["maxPageCount"] = settings.max_page_count
-    if settings.max_file_size_mb > 0:
-        result["maxFileSizeMb"] = settings.max_file_size_mb
-    return result
+    return HealthResponse(
+        status=status,
+        version=settings.app_version,
+        engine=settings.conversion_engine,
+        deployment_mode=settings.deployment_mode,
+        database=db_status,
+        max_page_count=settings.max_page_count if settings.max_page_count > 0 else None,
+        max_file_size_mb=settings.max_file_size_mb if settings.max_file_size_mb > 0 else None,
+    )
