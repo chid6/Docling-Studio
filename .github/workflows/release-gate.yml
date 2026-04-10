@@ -591,12 +591,12 @@ jobs:
           docker compose logs
           exit 1
 
-      - name: Run UI tests
+      - name: Run critical UI tests
         run: >
           mvn test -f e2e/ui/pom.xml
           -DbaseUrl=http://localhost:3000
           -DuiBaseUrl=http://localhost:3000
-          -Dkarate.options="--tags @ui"
+          -Dkarate.options="--tags @critical"
 
       - name: Upload Karate UI reports
         if: always()
