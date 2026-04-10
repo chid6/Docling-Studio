@@ -1,6 +1,6 @@
 # Security Vulnerability Response
 
-Process for handling reported security vulnerabilities. See also [SECURITY.md](../../SECURITY.md) for the public-facing policy.
+Process for handling reported security vulnerabilities. See also [SECURITY.md](https://github.com/scub-france/Docling-Studio/blob/main/SECURITY.md) for the public-facing policy.
 
 ## Response Timeline
 

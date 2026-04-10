@@ -79,7 +79,7 @@ Conventions for writing consistent, readable code across the Docling Studio code
 
 ## Karate (E2E — `e2e/`)
 
-See [e2e/CONVENTIONS.md](../../e2e/CONVENTIONS.md) for detailed rules.
+See [e2e/CONVENTIONS.md](https://github.com/scub-france/Docling-Studio/blob/main/e2e/CONVENTIONS.md) for detailed rules.
 
 Key points:
 - Use `data-e2e` selectors, never CSS classes

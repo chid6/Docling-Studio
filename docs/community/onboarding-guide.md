@@ -66,7 +66,7 @@ git checkout main && git pull upstream main
 git checkout -b feature/my-change    # or fix/my-fix
 ```
 
-Follow the [branching strategy](../../CONTRIBUTING.md#branching-strategy).
+Follow the [branching strategy](https://github.com/scub-france/Docling-Studio/blob/main/CONTRIBUTING.md#branching-strategy).
 
 ## Step 6 — Code
 
@@ -102,7 +102,7 @@ git push origin feature/my-change
 ## Step 9 — Open a PR
 
 - Target: `main` (or `release/*` for pre-release fixes)
-- Fill in the [PR template](../../.github/PULL_REQUEST_TEMPLATE.md)
+- Fill in the [PR template](https://github.com/scub-france/Docling-Studio/blob/main/.github/PULL_REQUEST_TEMPLATE.md)
 - Add a line in `CHANGELOG.md` under `[Unreleased]`
 - Wait for CI to pass, then request a review
 
@@ -117,4 +117,4 @@ git push origin feature/my-change
 
 - Open a [Discussion](https://github.com/scub-france/Docling-Studio/discussions) on GitHub
 - Check existing issues for similar questions
-- Read the [CONTRIBUTING guide](../../CONTRIBUTING.md) for detailed rules
+- Read the [CONTRIBUTING guide](https://github.com/scub-france/Docling-Studio/blob/main/CONTRIBUTING.md) for detailed rules

@@ -30,7 +30,7 @@ Use this checklist when reviewing a Pull Request. Not every item applies to ever
 - [ ] New behavior has corresponding tests
 - [ ] Tests are deterministic (no `sleep`, no random, no network)
 - [ ] Test names describe the scenario, not the implementation
-- [ ] E2E tests use `data-e2e` attributes, not CSS classes (see [e2e/CONVENTIONS.md](../../e2e/CONVENTIONS.md))
+- [ ] E2E tests use `data-e2e` attributes, not CSS classes (see [e2e/CONVENTIONS.md](https://github.com/scub-france/Docling-Studio/blob/main/e2e/CONVENTIONS.md))
 
 ## Code Quality
 
