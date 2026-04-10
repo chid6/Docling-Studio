@@ -1,4 +1,4 @@
-@critical @ui
+@ui
 Feature: UI — Upload a PDF and verify preview
 
   Background:
