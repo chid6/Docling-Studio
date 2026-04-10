@@ -152,7 +152,7 @@ class TestAnalysisServiceCancellation:
         task = asyncio.create_task(instant())
         service._running_tasks["j1"] = task
         task.add_done_callback(functools.partial(service._on_task_done, job_id="j1"))
-        await task
+        await asyncio.gather(task)
 
         assert "j1" not in service._running_tasks
 

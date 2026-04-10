@@ -120,7 +120,6 @@ def _ensure_default_converter() -> DoclingConverter:
         try:
             _default_converter = _build_docling_converter(ConversionOptions())
         except Exception:
-            _default_converter = None
             raise
     return _default_converter
 
