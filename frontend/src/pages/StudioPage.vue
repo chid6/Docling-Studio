@@ -441,7 +441,12 @@
         <div v-if="mode === 'preparer' && chunkingEnabled" class="prepare-panel">
           <ChunkPanel
             :current-page="currentPage"
+            :analysis-id="analysisStore.currentAnalysis?.id ?? null"
+            :analysis-status="analysisStore.currentAnalysis?.status ?? null"
+            :has-document-json="analysisStore.currentAnalysis?.hasDocumentJson ?? false"
+            :chunks="analysisStore.currentChunks"
             @highlight-bboxes="highlightedChunkBboxes = $event"
+            @rechunked="onRechunked"
           />
         </div>
       </div>
@@ -561,6 +566,12 @@ async function runAnalysis() {
 
 function addMore() {
   documentStore.selectedId = null
+}
+
+async function onRechunked() {
+  if (analysisStore.currentAnalysis?.id) {
+    await analysisStore.select(analysisStore.currentAnalysis.id)
+  }
 }
 
 // Clear highlights when switching modes or pages

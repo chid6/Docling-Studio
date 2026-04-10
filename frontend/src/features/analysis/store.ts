@@ -45,26 +45,6 @@ export const useAnalysisStore = defineStore('analysis', () => {
     }
   })
 
-  const rechunking = ref(false)
-
-  async function rechunk(jobId: string, chunkingOptions: ChunkingOptions): Promise<Chunk[]> {
-    rechunking.value = true
-    error.value = null
-    try {
-      const chunks = await api.rechunkAnalysis(jobId, chunkingOptions)
-      if (currentAnalysis.value?.id === jobId) {
-        currentAnalysis.value = await api.fetchAnalysis(jobId)
-      }
-      return chunks
-    } catch (e) {
-      error.value = (e as Error).message || 'Failed to rechunk'
-      console.error('Failed to rechunk', e)
-      throw e
-    } finally {
-      rechunking.value = false
-    }
-  }
-
   async function run(
     documentId: string,
     pipelineOptions: PipelineOptions | null = null,
@@ -157,12 +137,10 @@ export const useAnalysisStore = defineStore('analysis', () => {
     currentPages,
     currentChunks,
     running,
-    rechunking,
     error,
     clearError,
     load,
     run,
-    rechunk,
     select,
     remove,
     stopPolling,

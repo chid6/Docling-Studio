@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { apiFetch } from '../../shared/api/http'
+import { appMaxFileSizeMb, appMaxPageCount } from '../../shared/appConfig'
 
 type ConversionEngine = 'local' | 'remote'
 type DeploymentMode = 'self-hosted' | 'huggingface'
@@ -64,6 +65,8 @@ export const useFeatureFlagStore = defineStore('feature-flags', () => {
       deploymentMode.value = data.deploymentMode ?? 'self-hosted'
       maxPageCount.value = data.maxPageCount ?? 0
       maxFileSizeMb.value = data.maxFileSizeMb ?? 0
+      appMaxFileSizeMb.value = maxFileSizeMb.value
+      appMaxPageCount.value = maxPageCount.value
       if (data.version) appVersion.value = data.version
       loaded.value = true
       error.value = null

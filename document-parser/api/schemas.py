@@ -26,6 +26,16 @@ class _CamelModel(BaseModel):
     )
 
 
+class HealthResponse(_CamelModel):
+    status: str
+    version: str
+    engine: str
+    deployment_mode: str
+    database: str
+    max_page_count: int | None = None
+    max_file_size_mb: int | None = None
+
+
 class DocumentResponse(_CamelModel):
     id: str
     filename: str

@@ -60,11 +60,11 @@
         <button
           class="chunk-btn primary"
           data-e2e="chunk-btn"
-          :disabled="!canRechunk || analysisStore.rechunking"
+          :disabled="!canRechunk || chunkingStore.rechunking"
           @click="doRechunk"
         >
-          <div v-if="analysisStore.rechunking" class="spinner-sm" />
-          {{ analysisStore.rechunking ? t('chunking.chunking') : t('chunking.run') }}
+          <div v-if="chunkingStore.rechunking" class="spinner-sm" />
+          {{ chunkingStore.rechunking ? t('chunking.chunking') : t('chunking.run') }}
         </button>
 
         <!-- Batch mode notice -->
@@ -111,11 +111,9 @@
       </div>
     </div>
 
-    <div class="chunk-empty" v-else-if="!analysisStore.rechunking">
+    <div class="chunk-empty" v-else-if="!chunkingStore.rechunking">
       <p>
-        {{
-          analysisStore.currentChunks.length ? t('chunking.noChunksOnPage') : t('chunking.noChunks')
-        }}
+        {{ chunks.length ? t('chunking.noChunksOnPage') : t('chunking.noChunks') }}
       </p>
     </div>
 
@@ -132,7 +130,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, computed } from 'vue'
-import { useAnalysisStore } from '../../analysis/store'
+import { useChunkingStore } from '../store'
 import { useI18n } from '../../../shared/i18n'
 import { usePagination } from '../../../shared/composables/usePagination'
 import { PaginationBar } from '../../../shared/ui'
@@ -140,13 +138,18 @@ import type { Chunk, ChunkBbox, ChunkingOptions } from '../../../shared/types'
 
 const props = defineProps<{
   currentPage: number
+  analysisId: string | null
+  analysisStatus: string | null
+  hasDocumentJson: boolean
+  chunks: Chunk[]
 }>()
 
 const emit = defineEmits<{
   'highlight-bboxes': [bboxes: ChunkBbox[]]
+  rechunked: []
 }>()
 
-const analysisStore = useAnalysisStore()
+const chunkingStore = useChunkingStore()
 const { t } = useI18n()
 
 const configOpen = ref(true)
@@ -159,19 +162,15 @@ const options = reactive<Required<ChunkingOptions>>({
 })
 
 const canRechunk = computed(() => {
-  const analysis = analysisStore.currentAnalysis
-  return analysis?.status === 'COMPLETED' && analysis.hasDocumentJson
+  return props.analysisStatus === 'COMPLETED' && props.hasDocumentJson
 })
 
 /** True when the analysis was batched (document_json unavailable). */
 const isBatchedAnalysis = computed(() => {
-  const analysis = analysisStore.currentAnalysis
-  return analysis?.status === 'COMPLETED' && !analysis.hasDocumentJson
+  return props.analysisStatus === 'COMPLETED' && !props.hasDocumentJson
 })
 
-const pageChunks = computed(() =>
-  analysisStore.currentChunks.filter((c) => c.sourcePage === props.currentPage),
-)
+const pageChunks = computed(() => props.chunks.filter((c) => c.sourcePage === props.currentPage))
 const pagination = usePagination(pageChunks, { pageSize: 20 })
 
 function globalIndex(localIdx: number): number {
@@ -192,8 +191,9 @@ function onChunkLeave() {
 }
 
 async function doRechunk() {
-  if (!analysisStore.currentAnalysis) return
-  await analysisStore.rechunk(analysisStore.currentAnalysis.id, { ...options })
+  if (!props.analysisId) return
+  await chunkingStore.rechunk(props.analysisId, { ...options })
+  emit('rechunked')
 }
 </script>
 

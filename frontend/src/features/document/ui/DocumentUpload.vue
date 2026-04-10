@@ -33,24 +33,23 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { useDocumentStore } from '../store'
-import { useFeatureFlagStore } from '../../feature-flags/store'
 import { useI18n } from '../../../shared/i18n'
+import { appMaxFileSizeMb, appMaxPageCount } from '../../../shared/appConfig'
 
 const emit = defineEmits<{ uploaded: [docId: string] }>()
 
 const store = useDocumentStore()
-const flags = useFeatureFlagStore()
 const { t } = useI18n()
 const fileInput = ref<HTMLInputElement | null>(null)
 const dragging = ref(false)
 
 const uploadHint = computed(() => {
   const parts: string[] = []
-  if (flags.maxFileSizeMb > 0) {
-    parts.push(t('upload.maxSize').replace('{n}', String(flags.maxFileSizeMb)))
+  if (appMaxFileSizeMb.value > 0) {
+    parts.push(t('upload.maxSize').replace('{n}', String(appMaxFileSizeMb.value)))
   }
-  if (flags.maxPageCount > 0) {
-    parts.push(t('upload.maxPages').replace('{n}', String(flags.maxPageCount)))
+  if (appMaxPageCount.value > 0) {
+    parts.push(t('upload.maxPages').replace('{n}', String(appMaxPageCount.value)))
   }
   return parts.join(' · ')
 })
