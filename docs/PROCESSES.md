@@ -1,4 +1,4 @@
-# Available Processes
+****# Available Processes
 
 Index of all documented processes in Docling Studio. Each process is a structured, repeatable workflow with a clear trigger and deliverable.
 
@@ -30,9 +30,9 @@ Crée un ADR pour [la décision à documenter]
 | # | Process | Trigger / Command | Doc | Output |
 |---|---------|-------------------|-----|--------|
 | 5 | **Full Release Audit** | Before merging `release/*` to `main` | [docs/audit/master.md](audit/master.md) | 12 audit reports + summary in `reports/release-X.Y.Z/` |
-| 6 | **Single Audit** | Targeted check on one axis | [docs/audit/audits/*.md](audit/audits/) | Single audit report |
+| 6 | **Single Audit** | Targeted check on one axis | [docs/audit/audits/*.md](audit/audits/01-clean-architecture.md) | Single audit report |
 | 7 | **Re-Audit** | After fixing CRIT/MAJ findings | [docs/audit/master.md](audit/master.md) | Updated report |
-| 8 | **Automated Checks** | Quick validation before audit | [profiles/fastapi-vue/commands.sh](../profiles/fastapi-vue/commands.sh) | PASS/WARN/FAIL per check |
+| 8 | **Automated Checks** | Quick validation before audit | [profiles/fastapi-vue/commands.sh](https://github.com/scub-france/Docling-Studio/blob/main/profiles/fastapi-vue/commands.sh) | PASS/WARN/FAIL per check |
 
 ### How to invoke
 
@@ -56,11 +56,11 @@ bash profiles/fastapi-vue/commands.sh
 
 | # | Process | Trigger / Command | Doc | Output |
 |---|---------|-------------------|-----|--------|
-| 9 | **Release Gate** | Auto on push/PR `release/*` → `main` | [release-gate.yml](../.github/workflows/release-gate.yml) | GO / GO CONDITIONAL / NO-GO comment on PR |
-| 10 | **Release** | Feature freeze on `release/*` | [CONTRIBUTING.md](../CONTRIBUTING.md#release-process) | Tag `vX.Y.Z`, Docker images on ghcr.io |
+| 9 | **Release Gate** | Auto on push/PR `release/*` → `main` | [release-gate.yml](https://github.com/scub-france/Docling-Studio/blob/main/.github/workflows/release-gate.yml) | GO / GO CONDITIONAL / NO-GO comment on PR |
+| 10 | **Release** | Feature freeze on `release/*` | [CONTRIBUTING.md](https://github.com/scub-france/Docling-Studio/blob/main/CONTRIBUTING.md#release-process) | Tag `vX.Y.Z`, Docker images on ghcr.io |
 | 11 | **Deployment** | After release tag | [deployment-checklist.md](release/deployment-checklist.md) | Running instance at new version |
 | 12 | **Rollback** | Post-deploy failure detected | [rollback-playbook.md](release/rollback-playbook.md) | Reverted to last known good version |
-| 13 | **Hotfix** | Critical bug on released version | [CONTRIBUTING.md](../CONTRIBUTING.md#hotfix) | Patch release `vX.Y.Z+1` |
+| 13 | **Hotfix** | Critical bug on released version | [CONTRIBUTING.md](https://github.com/scub-france/Docling-Studio/blob/main/CONTRIBUTING.md#hotfix) | Patch release `vX.Y.Z+1` |
 
 ### Release Gate details
 
@@ -170,10 +170,10 @@ These are not processes but reference documents used by the processes above:
 
 | Document | Purpose |
 |----------|---------|
-| [CONTRIBUTING.md](../CONTRIBUTING.md) | Dev setup, branching, release, versioning |
+| [CONTRIBUTING.md](https://github.com/scub-france/Docling-Studio/blob/main/CONTRIBUTING.md) | Dev setup, branching, release, versioning |
 | [coding-standards.md](architecture/coding-standards.md) | Naming, style, architecture rules |
-| [e2e/CONVENTIONS.md](../e2e/CONVENTIONS.md) | Karate / Karate UI test conventions |
+| [e2e/CONVENTIONS.md](https://github.com/scub-france/Docling-Studio/blob/main/e2e/CONVENTIONS.md) | Karate / Karate UI test conventions |
 | [architecture.md](architecture.md) | System architecture (backend + frontend) |
-| [CODE_OF_CONDUCT.md](../CODE_OF_CONDUCT.md) | Community behavior standards |
-| [SECURITY.md](../SECURITY.md) | Vulnerability reporting policy |
-| [profiles/fastapi-vue/profile.md](../profiles/fastapi-vue/profile.md) | Stack layer mapping for audits |
+| [CODE_OF_CONDUCT.md](https://github.com/scub-france/Docling-Studio/blob/main/CODE_OF_CONDUCT.md) | Community behavior standards |
+| [SECURITY.md](https://github.com/scub-france/Docling-Studio/blob/main/SECURITY.md) | Vulnerability reporting policy |
+| [profiles/fastapi-vue/profile.md](https://github.com/scub-france/Docling-Studio/blob/main/profiles/fastapi-vue/profile.md) | Stack layer mapping for audits |
