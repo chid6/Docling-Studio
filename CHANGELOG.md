@@ -14,6 +14,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 - Vector index metadata schema: `IndexedChunk` domain model, OpenSearch mapping builder, configurable embedding dimension
 - `VectorStore` port (Protocol): `ensure_index`, `index_chunks`, `search_similar`, `get_chunks`, `delete_document`
 - OpenSearch adapter (`OpenSearchStore`): kNN vector search, full-text search, bulk indexing, document CRUD
+- Embedding microservice (`embedding-service/`): sentence-transformers REST API with batch processing and Dockerfile
+- `EmbeddingService` port and `EmbeddingClient` HTTP adapter for remote embedding generation
 
 ### Fixed
 

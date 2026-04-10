@@ -24,6 +24,7 @@ class Settings:
     rate_limit_rpm: int = 100  # requests per minute per IP (0 = disabled)
     batch_page_size: int = 0  # 0 = disabled, > 0 = pages per batch
     opensearch_url: str = ""  # empty = disabled
+    embedding_url: str = ""  # empty = disabled (e.g. http://localhost:8001)
     embedding_dimension: int = 384  # Granite Embedding 30M / all-MiniLM-L6-v2
     upload_dir: str = "./uploads"
     db_path: str = "./data/docling_studio.db"
@@ -95,6 +96,7 @@ class Settings:
             rate_limit_rpm=int(os.environ.get("RATE_LIMIT_RPM", "100")),
             batch_page_size=int(os.environ.get("BATCH_PAGE_SIZE", "0")),
             opensearch_url=os.environ.get("OPENSEARCH_URL", ""),
+            embedding_url=os.environ.get("EMBEDDING_URL", ""),
             embedding_dimension=int(os.environ.get("EMBEDDING_DIMENSION", "384")),
             upload_dir=os.environ.get("UPLOAD_DIR", "./uploads"),
             db_path=os.environ.get("DB_PATH", "./data/docling_studio.db"),
