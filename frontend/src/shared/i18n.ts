@@ -131,6 +131,10 @@ const messages: Messages = {
     'chunking.batchNotice':
       'Le chunking n\u2019est pas disponible pour cette analyse. Les documents volumineux trait\u00e9s par batch ne g\u00e9n\u00e8rent pas la structure interne n\u00e9cessaire au d\u00e9coupage.',
 
+    // Search
+    'nav.search': 'Recherche',
+    'search.hint': 'Saisissez un terme pour rechercher dans les chunks indexés.',
+
     // Ingestion / My Documents
     'ingestion.ingest': 'Ingérer',
     'ingestion.ingesting': 'Ingestion...',
@@ -291,6 +295,9 @@ const messages: Messages = {
       'Delete this chunk? It will be marked as deleted until the next sync.',
     'chunking.batchNotice':
       'Chunking is not available for this analysis. Large documents processed in batch mode do not generate the internal structure required for chunking.',
+
+    'nav.search': 'Search',
+    'search.hint': 'Enter a term to search through indexed chunks.',
 
     'ingestion.ingest': 'Ingest',
     'ingestion.ingesting': 'Ingesting...',
