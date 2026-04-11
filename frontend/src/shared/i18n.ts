@@ -109,6 +109,7 @@ const messages: Messages = {
 
     // Chunking
     'studio.prepare': 'Préparer',
+    'studio.ingest': 'Ingérer',
     'chunking.settings': 'Chunking',
     'chunking.chunkerType': 'Type de chunker',
     'chunking.maxTokens': 'Tokens max',
@@ -137,6 +138,9 @@ const messages: Messages = {
 
     // Ingestion / My Documents
     'ingestion.ingest': 'Ingérer',
+    'ingestion.document': 'Document',
+    'ingestion.chunkCount': 'Chunks prêts',
+    'ingestion.successMessage': 'Indexation terminée avec succès !',
     'ingestion.ingesting': 'Ingestion...',
     'ingestion.reindex': 'Ré-indexer',
     'ingestion.indexed': 'Indexé',
@@ -274,6 +278,7 @@ const messages: Messages = {
     'history.open': 'Open',
 
     'studio.prepare': 'Prepare',
+    'studio.ingest': 'Ingest',
     'chunking.settings': 'Chunking',
     'chunking.chunkerType': 'Chunker type',
     'chunking.maxTokens': 'Max tokens',
@@ -300,6 +305,9 @@ const messages: Messages = {
     'search.hint': 'Enter a term to search through indexed chunks.',
 
     'ingestion.ingest': 'Ingest',
+    'ingestion.document': 'Document',
+    'ingestion.chunkCount': 'Chunks ready',
+    'ingestion.successMessage': 'Indexing completed successfully!',
     'ingestion.ingesting': 'Ingesting...',
     'ingestion.reindex': 'Re-index',
     'ingestion.indexed': 'Indexed',
