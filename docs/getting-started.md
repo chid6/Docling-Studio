@@ -141,7 +141,7 @@ All configuration is done via environment variables:
 | `UPLOAD_DIR` | `./uploads` | File storage directory |
 | `DB_PATH` | `./data/docling_studio.db` | SQLite database path |
 | `CONVERSION_TIMEOUT` | `600` | Max seconds per Docling conversion |
-| `BATCH_PAGE_SIZE` | `5` | Pages per batch (`0` = process all at once) |
+| `BATCH_PAGE_SIZE` | `10` | Pages per batch (`0` = process all at once) |
 | `MAX_CONCURRENT_ANALYSES` | `3` | Maximum parallel analysis jobs |
 | `DEPLOYMENT_MODE` | `self-hosted` | `self-hosted` or `huggingface` (shows disclaimer banner) |
 | `MAX_FILE_SIZE_MB` | `50` | Maximum upload file size in MB (`0` = unlimited) |
