@@ -206,7 +206,7 @@ All configuration is done via environment variables. See [`.env.example`](.env.e
 | `UPLOAD_DIR` | `./uploads` | File storage directory |
 | `DB_PATH` | `./data/docling_studio.db` | SQLite database path |
 | `CONVERSION_TIMEOUT` | `600` | Max seconds for a single Docling conversion |
-| `BATCH_PAGE_SIZE` | `5` (Docker) / `0` | Pages per batch (`0` = process all at once) |
+| `BATCH_PAGE_SIZE` | `5` | Pages per batch (`0` = process all at once) |
 | `MAX_FILE_SIZE_MB` | `50` | Maximum upload file size in MB (`0` = unlimited) |
 | `MAX_PAGE_COUNT` | `0` | Maximum number of pages per document (`0` = unlimited) |
 | `RATE_LIMIT_RPM` | `100` | Max requests per minute per IP (`0` = disabled) |

@@ -76,4 +76,3 @@ RUN pip install --no-cache-dir torch torchvision --index-url https://download.py
 RUN chown -R appuser:appuser /app \
     && chown -R appuser:appuser /usr/local/lib/python3.12/site-packages/rapidocr/models
 ENV CONVERSION_ENGINE=local
-ENV BATCH_PAGE_SIZE=5

@@ -74,7 +74,7 @@ services:
       DOCLING_SERVE_API_KEY: ${DOCLING_SERVE_API_KEY:-}
       RATE_LIMIT_RPM: ${RATE_LIMIT_RPM:-100}
       MAX_FILE_SIZE_MB: ${MAX_FILE_SIZE_MB:-50}
-      BATCH_PAGE_SIZE: ${BATCH_PAGE_SIZE:-0}
+      BATCH_PAGE_SIZE: ${BATCH_PAGE_SIZE:-5}
       OPENSEARCH_URL: http://opensearch:9200
       EMBEDDING_URL: http://embedding:8001
     command: ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
