@@ -94,7 +94,7 @@ class Settings:
             max_file_size=int(os.environ.get("MAX_FILE_SIZE", "0")),
             max_file_size_mb=int(os.environ.get("MAX_FILE_SIZE_MB", "50")),
             rate_limit_rpm=int(os.environ.get("RATE_LIMIT_RPM", "100")),
-            batch_page_size=int(os.environ.get("BATCH_PAGE_SIZE", "0")),
+            batch_page_size=int(os.environ.get("BATCH_PAGE_SIZE", "10")),
             opensearch_url=os.environ.get("OPENSEARCH_URL", ""),
             embedding_url=os.environ.get("EMBEDDING_URL", ""),
             embedding_dimension=int(os.environ.get("EMBEDDING_DIMENSION", "384")),
