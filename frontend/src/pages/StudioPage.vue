@@ -22,7 +22,7 @@
         <div class="mode-toggle">
           <button
             class="toggle-btn"
-            data-e2e="toggle-btn"
+            data-e2e="toggle-btn configure-btn"
             :class="{ active: mode === 'configure' }"
             @click="mode = 'configure'"
           >
@@ -37,7 +37,7 @@
           </button>
           <button
             class="toggle-btn"
-            data-e2e="toggle-btn"
+            data-e2e="toggle-btn verify-btn"
             :class="{ active: mode === 'verify' }"
             @click="mode = 'verify'"
             :disabled="!analysisStore.currentAnalysis"
@@ -54,7 +54,7 @@
           <button
             v-if="chunkingEnabled"
             class="toggle-btn"
-            data-e2e="toggle-btn"
+            data-e2e="toggle-btn prepare-btn"
             :class="{ active: mode === 'prepare' }"
             @click="mode = 'prepare'"
             :disabled="!analysisStore.currentAnalysis"
@@ -65,6 +65,24 @@
               />
             </svg>
             {{ t('studio.prepare') }}
+          </button>
+          <button
+            v-if="chunkingEnabled && ingestionEnabled && ingestionStore.available"
+            class="toggle-btn"
+            data-e2e="toggle-btn"
+            :class="{ active: mode === 'ingest' }"
+            @click="mode = 'ingest'"
+            :disabled="!canIngest"
+            :title="!canIngest ? t('ingestion.unavailable') : ''"
+          >
+            <svg class="toggle-icon" viewBox="0 0 20 20" fill="currentColor">
+              <path
+                fill-rule="evenodd"
+                d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z"
+                clip-rule="evenodd"
+              />
+            </svg>
+            {{ t('studio.ingest') }}
           </button>
         </div>
       </div>
@@ -446,7 +464,15 @@
             :has-document-json="analysisStore.currentAnalysis?.hasDocumentJson ?? false"
             :chunks="analysisStore.currentChunks"
             @highlight-bboxes="highlightedChunkBboxes = $event"
-            @rechunked="onRechunked"
+          />
+        </div>
+
+        <!-- INGEST MODE -->
+        <div v-if="mode === 'ingest'" class="ingest-panel-wrapper">
+          <IngestPanel
+            :analysis-id="analysisStore.currentAnalysis?.id ?? null"
+            :document-name="selectedDoc?.filename ?? ''"
+            :chunk-count="analysisStore.currentChunks?.length ?? 0"
           />
         </div>
       </div>
@@ -459,10 +485,12 @@ import { ref, computed, watch, nextTick, onMounted, onBeforeUnmount, reactive } 
 import { useRoute, useRouter } from 'vue-router'
 import { useDocumentStore } from '../features/document/store'
 import { useAnalysisStore } from '../features/analysis/store'
+import { useIngestionStore } from '../features/ingestion/store'
 import { DocumentUpload, DocumentList } from '../features/document/index'
 import { ResultTabs } from '../features/analysis/index'
 import BboxOverlay from '../features/analysis/ui/BboxOverlay.vue'
 import { ChunkPanel } from '../features/chunking'
+import { IngestPanel } from '../features/ingestion'
 import { useFeatureFlag } from '../features/feature-flags'
 import { getPreviewUrl } from '../features/document/api'
 import { useI18n } from '../shared/i18n'
@@ -472,8 +500,10 @@ const route = useRoute()
 const router = useRouter()
 const documentStore = useDocumentStore()
 const analysisStore = useAnalysisStore()
+const ingestionStore = useIngestionStore()
 const { t } = useI18n()
 const chunkingEnabled = useFeatureFlag('chunking')
+const ingestionEnabled = useFeatureFlag('ingestion')
 
 const mode = ref('configure')
 const currentPage = ref(1)
@@ -528,6 +558,14 @@ const pipelineOptions = reactive<PipelineOptions>({
   images_scale: 1.0,
 })
 
+const canIngest = computed(() => {
+  return (
+    ingestionStore.available &&
+    analysisStore.currentAnalysis?.status === 'COMPLETED' &&
+    analysisStore.currentAnalysis?.chunksJson != null
+  )
+})
+
 const hasAnalysisResults = computed(() => {
   return (
     analysisStore.currentAnalysis?.status === 'COMPLETED' && analysisStore.currentPages?.length > 0
@@ -568,12 +606,6 @@ function addMore() {
   documentStore.selectedId = null
 }
 
-async function onRechunked() {
-  if (analysisStore.currentAnalysis?.id) {
-    await analysisStore.select(analysisStore.currentAnalysis.id)
-  }
-}
-
 // Clear highlights when switching modes or pages
 watch(mode, () => {
   highlightedElementIndex.value = -1
@@ -598,6 +630,9 @@ watch(
 onMounted(async () => {
   await documentStore.load()
   analysisStore.load()
+  if (ingestionEnabled.value) {
+    ingestionStore.checkAvailability()
+  }
 
   // Restore analysis from history via query param
   const analysisId = route.query.analysisId
@@ -1369,9 +1404,10 @@ onBeforeUnmount(() => {
   padding-top: 16px;
 }
 
-/* Verify panel */
+/* Verify / Prepare / Ingest panels */
 .verify-panel,
-.prepare-panel {
+.prepare-panel,
+.ingest-panel-wrapper {
   height: 100%;
   overflow: hidden;
   display: flex;

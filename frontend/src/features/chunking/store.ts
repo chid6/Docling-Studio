@@ -5,6 +5,8 @@ import * as api from './api'
 
 export const useChunkingStore = defineStore('chunking', () => {
   const rechunking = ref(false)
+  const saving = ref(false)
+  const deleting = ref(false)
   const error = ref<string | null>(null)
 
   async function rechunk(jobId: string, chunkingOptions: ChunkingOptions): Promise<Chunk[]> {
@@ -21,5 +23,37 @@ export const useChunkingStore = defineStore('chunking', () => {
     }
   }
 
-  return { rechunking, error, rechunk }
+  async function updateChunkText(
+    jobId: string,
+    chunkIndex: number,
+    text: string,
+  ): Promise<Chunk[]> {
+    saving.value = true
+    error.value = null
+    try {
+      return await api.updateChunkText(jobId, chunkIndex, text)
+    } catch (e) {
+      error.value = (e as Error).message || 'Failed to update chunk'
+      console.error('Failed to update chunk', e)
+      throw e
+    } finally {
+      saving.value = false
+    }
+  }
+
+  async function deleteChunk(jobId: string, chunkIndex: number): Promise<Chunk[]> {
+    deleting.value = true
+    error.value = null
+    try {
+      return await api.deleteChunk(jobId, chunkIndex)
+    } catch (e) {
+      error.value = (e as Error).message || 'Failed to delete chunk'
+      console.error('Failed to delete chunk', e)
+      throw e
+    } finally {
+      deleting.value = false
+    }
+  }
+
+  return { rechunking, saving, deleting, error, rechunk, updateChunkText, deleteChunk }
 })

@@ -17,6 +17,35 @@ Thank you for your interest in contributing to Docling Studio! This guide will h
 
 ## Development Setup
 
+### Docker Dev Stack (recommended)
+
+The fastest way to get the full stack running (backend + frontend + OpenSearch):
+
+```bash
+docker compose -f docker-compose.dev.yml up
+```
+
+This starts:
+
+| Service | URL | Notes |
+|---------|-----|-------|
+| Frontend (Vite) | http://localhost:3000 | HMR enabled |
+| Backend (FastAPI) | http://localhost:8000 | Auto-reload on file changes |
+| OpenSearch | http://localhost:9200 | Single-node, security disabled |
+| OpenSearch Dashboards | http://localhost:5601 | Index inspection UI |
+
+Source code is bind-mounted — edits on your host are reflected immediately.
+
+To use remote conversion mode instead of local:
+
+```bash
+CONVERSION_MODE=remote docker compose -f docker-compose.dev.yml up
+```
+
+### Manual Setup
+
+If you prefer running services directly on your machine:
+
 ### Backend (Python 3.12+)
 
 ```bash
@@ -67,13 +96,41 @@ npx prettier --write src/   # auto-format
 ## Running Tests
 
 ```bash
-# Backend (199 tests)
+# Backend (377 tests)
 cd document-parser
 pytest tests/ -v
 
-# Frontend (129 tests)
+# Frontend (156 tests)
 cd frontend
 npm run test:run
+```
+
+### E2E API (Karate)
+
+```bash
+# Generate test PDFs + start stack
+python e2e/generate-test-data.py
+docker compose up -d --wait
+
+# Run all API tests
+mvn test -f e2e/api/pom.xml
+
+# Or by tag: @smoke, @regression, @e2e
+mvn test -f e2e/api/pom.xml -Dkarate.options="--tags @smoke"
+```
+
+### E2E UI (Karate UI)
+
+```bash
+# Generate test PDFs + start stack (if not already running)
+python e2e/generate-test-data.py
+docker compose up -d --wait
+
+# Run critical UI tests (CI scope)
+mvn test -f e2e/ui/pom.xml -Dkarate.options="--tags @critical"
+
+# Run all UI tests (local scope)
+mvn test -f e2e/ui/pom.xml -Dkarate.options="--tags @ui"
 ```
 
 All tests must pass before submitting a PR.

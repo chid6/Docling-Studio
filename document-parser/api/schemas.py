@@ -34,6 +34,7 @@ class HealthResponse(_CamelModel):
     database: str
     max_page_count: int | None = None
     max_file_size_mb: int | None = None
+    ingestion_available: bool = False
 
 
 class DocumentResponse(_CamelModel):
@@ -158,6 +159,12 @@ class ChunkResponse(_CamelModel):
     source_page: int | None = None
     token_count: int = 0
     bboxes: list[ChunkBboxResponse] = []
+    modified: bool = False
+    deleted: bool = False
+
+
+class UpdateChunkTextRequest(BaseModel):
+    text: str
 
 
 class CreateAnalysisRequest(BaseModel):
@@ -174,3 +181,33 @@ class RechunkRequest(BaseModel):
     chunkingOptions: ChunkingOptionsRequest = Field(
         validation_alias=AliasChoices("chunkingOptions", "chunking_options")
     )
+
+
+class IngestionResponse(_CamelModel):
+    doc_id: str
+    chunks_indexed: int
+    embedding_dimension: int
+
+
+class IngestionStatusResponse(_CamelModel):
+    available: bool
+    opensearch_connected: bool = False
+
+
+class SearchResultItem(_CamelModel):
+    """A single search result with content and metadata."""
+
+    doc_id: str
+    filename: str
+    content: str
+    chunk_index: int
+    page_number: int
+    score: float
+    headings: list[str] = []
+    highlights: list[str] = []
+
+
+class SearchResponse(_CamelModel):
+    results: list[SearchResultItem]
+    total: int
+    query: str

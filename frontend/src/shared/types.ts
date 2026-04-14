@@ -58,6 +58,8 @@ export interface Chunk {
   sourcePage: number | null
   tokenCount: number
   bboxes: ChunkBbox[]
+  modified?: boolean
+  deleted?: boolean
 }
 
 export interface PageElement {

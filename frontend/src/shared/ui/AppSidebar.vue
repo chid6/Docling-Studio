@@ -46,6 +46,23 @@
       </RouterLink>
 
       <RouterLink
+        v-if="ingestionEnabled"
+        to="/search"
+        class="nav-item"
+        data-e2e="nav-search"
+        :class="{ active: route.name === 'search' }"
+      >
+        <svg class="nav-icon" viewBox="0 0 20 20" fill="currentColor">
+          <path
+            fill-rule="evenodd"
+            d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
+            clip-rule="evenodd"
+          />
+        </svg>
+        <span class="nav-label">{{ t('nav.search') }}</span>
+      </RouterLink>
+
+      <RouterLink
         to="/history"
         class="nav-item"
         data-e2e="nav-history"
@@ -79,6 +96,21 @@
     </nav>
 
     <div class="sidebar-footer">
+      <div
+        v-if="ingestionEnabled && ingestionStore.available"
+        class="opensearch-status"
+        :title="
+          ingestionStore.opensearchConnected
+            ? t('ingestion.opensearchConnected')
+            : t('ingestion.opensearchDisconnected')
+        "
+      >
+        <span
+          class="status-dot"
+          :class="ingestionStore.opensearchConnected ? 'connected' : 'disconnected'"
+        />
+        <span class="status-label">OpenSearch</span>
+      </div>
       <a
         class="github-badge"
         href="https://github.com/scub-france/Docling-Studio"
@@ -97,18 +129,32 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, onMounted, onBeforeUnmount } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
 import { useI18n } from '../i18n'
 import { useFeatureFlagStore } from '../../features/feature-flags/store'
+import { useIngestionStore } from '../../features/ingestion/store'
 
 const featureStore = useFeatureFlagStore()
+const ingestionStore = useIngestionStore()
+const ingestionEnabled = computed(() => featureStore.isEnabled('ingestion'))
 const version = computed(() => featureStore.appVersion)
 const route = useRoute()
 const { t } = useI18n()
 
 defineProps({
   open: { type: Boolean, default: false },
+})
+
+onMounted(() => {
+  if (ingestionEnabled.value) {
+    ingestionStore.checkAvailability()
+    ingestionStore.startPolling(30_000)
+  }
+})
+
+onBeforeUnmount(() => {
+  ingestionStore.stopPolling()
 })
 </script>
 
@@ -193,6 +239,37 @@ defineProps({
 
 .version {
   font-size: 12px;
+  color: var(--text-muted);
+  font-family: 'IBM Plex Mono', monospace;
+}
+
+.opensearch-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 10px;
+  cursor: default;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.status-dot.connected {
+  background: var(--success, #22c55e);
+  box-shadow: 0 0 4px var(--success, #22c55e);
+}
+
+.status-dot.disconnected {
+  background: var(--error, #ef4444);
+  box-shadow: 0 0 4px var(--error, #ef4444);
+}
+
+.status-label {
+  font-size: 11px;
   color: var(--text-muted);
   font-family: 'IBM Plex Mono', monospace;
 }

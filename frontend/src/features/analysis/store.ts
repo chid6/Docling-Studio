@@ -111,6 +111,15 @@ export const useAnalysisStore = defineStore('analysis', () => {
     }
   }
 
+  function updateChunks(chunks: Chunk[]): void {
+    if (currentAnalysis.value) {
+      currentAnalysis.value = {
+        ...currentAnalysis.value,
+        chunksJson: JSON.stringify(chunks),
+      }
+    }
+  }
+
   async function select(id: string): Promise<void> {
     try {
       currentAnalysis.value = await api.fetchAnalysis(id)
@@ -142,6 +151,7 @@ export const useAnalysisStore = defineStore('analysis', () => {
     load,
     run,
     select,
+    updateChunks,
     remove,
     stopPolling,
   }

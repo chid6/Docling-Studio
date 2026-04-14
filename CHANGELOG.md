@@ -4,6 +4,29 @@ All notable changes to Docling Studio will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.4.0] - 2026-04-13
+
+### Added
+
+- Inline chunk text editing: double-click or edit button to modify chunk text, with save/cancel and "modified" badge
+- Docker Compose dev stack (`docker-compose.dev.yml`) with OpenSearch, Dashboards, hot-reload backend and Vite frontend
+- Soft-delete chunks: delete button with confirmation dialog, chunks hidden from UI but preserved in data
+- Vector index metadata schema: `IndexedChunk` domain model, OpenSearch mapping builder, configurable embedding dimension
+- `VectorStore` port (Protocol): `ensure_index`, `index_chunks`, `search_similar`, `get_chunks`, `delete_document`
+- OpenSearch adapter (`OpenSearchStore`): kNN vector search, full-text search, bulk indexing, document CRUD
+- Embedding microservice (`embedding-service/`): sentence-transformers REST API with batch processing and Dockerfile
+- `EmbeddingService` port and `EmbeddingClient` HTTP adapter for remote embedding generation
+- Orchestrated ingestion pipeline: Docling → chunking → embedding → OpenSearch indexing (idempotent)
+- Ingestion REST API: `POST /api/ingestion/{jobId}`, `DELETE /api/ingestion/{docId}`, `GET /api/ingestion/status`
+- Production docker-compose with OpenSearch and embedding service
+- E2E Karate test for full ingestion workflow (PDF → chunks in OpenSearch)
+- My Documents screen: search, filter (all/indexed/not indexed), sort (name/date), ingestion status badges
+- Ingest button in Studio: one-click ingestion from completed analysis with progress feedback
+
+### Fixed
+
+### Changed
+
 ## [0.3.1] - 2026-04-09
 
 ### Added
