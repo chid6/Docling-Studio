@@ -225,6 +225,7 @@
 <script setup lang="ts">
 import { ref, reactive, computed } from 'vue'
 import { useChunkingStore } from '../store'
+import { useAnalysisStore } from '../../analysis/store'
 import { useI18n } from '../../../shared/i18n'
 import { usePagination } from '../../../shared/composables/usePagination'
 import { PaginationBar } from '../../../shared/ui'
@@ -240,10 +241,10 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   'highlight-bboxes': [bboxes: ChunkBbox[]]
-  rechunked: []
 }>()
 
 const chunkingStore = useChunkingStore()
+const analysisStore = useAnalysisStore()
 const { t } = useI18n()
 
 const configOpen = ref(true)
@@ -284,9 +285,9 @@ function confirmDelete(chunkIndex: number) {
 
 async function doDelete() {
   if (!props.analysisId || deleteConfirmIdx.value === -1) return
-  await chunkingStore.deleteChunk(props.analysisId, deleteConfirmIdx.value)
+  const chunks = await chunkingStore.deleteChunk(props.analysisId, deleteConfirmIdx.value)
   deleteConfirmIdx.value = -1
-  emit('rechunked')
+  analysisStore.updateChunks(chunks)
 }
 
 const editingIdx = ref(-1)
@@ -310,8 +311,8 @@ async function saveEdit(chunkIndex: number) {
     cancelEdit()
     return
   }
-  await chunkingStore.updateChunkText(props.analysisId, chunkIndex, editText.value)
-  emit('rechunked')
+  const chunks = await chunkingStore.updateChunkText(props.analysisId, chunkIndex, editText.value)
+  analysisStore.updateChunks(chunks)
   cancelEdit()
 }
 
@@ -330,8 +331,8 @@ function onChunkLeave() {
 
 async function doRechunk() {
   if (!props.analysisId) return
-  await chunkingStore.rechunk(props.analysisId, { ...options })
-  emit('rechunked')
+  const chunks = await chunkingStore.rechunk(props.analysisId, { ...options })
+  analysisStore.updateChunks(chunks)
 }
 </script>
 

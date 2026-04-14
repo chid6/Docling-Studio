@@ -464,7 +464,6 @@
             :has-document-json="analysisStore.currentAnalysis?.hasDocumentJson ?? false"
             :chunks="analysisStore.currentChunks"
             @highlight-bboxes="highlightedChunkBboxes = $event"
-            @rechunked="onRechunked"
           />
         </div>
 
@@ -605,12 +604,6 @@ async function runAnalysis() {
 
 function addMore() {
   documentStore.selectedId = null
-}
-
-async function onRechunked() {
-  if (analysisStore.currentAnalysis?.id) {
-    await analysisStore.select(analysisStore.currentAnalysis.id)
-  }
 }
 
 // Clear highlights when switching modes or pages
